@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.9.2
+
+[compare changes](https://github.com/NZ-WEB/nuxt-monitoring/compare/v0.9.1...v0.9.2)
+
+### 🚀 Enhancements
+
+- **metrics:** Replace Summary with Gauge for request duration and add playground test metric ([649891b](https://github.com/NZ-WEB/nuxt-monitoring/commit/649891b))
+
+### ❤️ Contributors
+
+- Nzweb <nzkann1ball@gmail.com>
+
 ## v0.9.1
 
 
