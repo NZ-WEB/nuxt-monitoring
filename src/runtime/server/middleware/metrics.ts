@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
   if (
     url.pathname ===
-    ((config.public.metrics as { path: string }).path || "/metrics")
+    ((config.public.monitoring!.metrics as { path: string }).path || "/metrics")
   ) {
     return;
   }

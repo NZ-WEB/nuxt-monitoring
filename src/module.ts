@@ -1,14 +1,15 @@
-import { defineNuxtModule, createResolver, addServerHandler } from "@nuxt/kit";
+import {
+  defineNuxtModule,
+  createResolver,
+  addServerHandler,
+  addServerPlugin,
+} from "@nuxt/kit";
 import { name, version } from "../package.json";
+import { logger } from "./runtime/logger";
 
 export interface MetricsConfig {
   enabled: boolean;
   path: string;
-  defaultMetrics: {
-    httpRequestTotal: boolean;
-    httpRequestDuration: boolean;
-    activeRequests: boolean;
-  };
 }
 
 export interface HealthCheckConfig {
@@ -25,48 +26,79 @@ export interface ModuleOptions {
   metrics: MetricsConfig;
   healthCheck: HealthCheckConfig;
   readyCheck: ReadyCheckConfig;
+  debugServer?: {
+    enabled: boolean;
+    port: number;
+  };
 }
+
+const defaults = {
+  metrics: {
+    enabled: true,
+    path: "/metrics",
+  },
+  healthCheck: {
+    enabled: true,
+    path: "/health",
+  },
+  readyCheck: {
+    enabled: true,
+    path: "/ready",
+  },
+  debugServer: {
+    enabled: false,
+    port: 3001,
+  },
+};
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name,
     version,
-    configKey: "metrics",
+    configKey: "monitoring",
   },
-  defaults: {
-    metrics: {
-      enabled: true,
-      path: "/metrics",
-      defaultMetrics: {
-        httpRequestTotal: true,
-        httpRequestDuration: true,
-        activeRequests: true,
-      },
-    },
-    healthCheck: {
-      enabled: true,
-      path: "/health",
-    },
-    readyCheck: {
-      enabled: true,
-      path: "/ready",
-    },
-  },
-  setup(options, nuxt) {
+  defaults,
+  async setup(options, nuxt) {
     const resolver = createResolver(import.meta.url);
 
-    if (options.metrics?.enabled) {
-      nuxt.options.runtimeConfig.public.metrics = {
-        path: options.metrics.path,
-      };
+    nuxt.options.runtimeConfig.public.monitoring = options;
 
+    if (options.metrics?.enabled) {
+      logger.info("metrics enabled");
       addServerHandler({
         handler: resolver.resolve("./runtime/server/middleware/metrics"),
       });
-      addServerHandler({
-        route: options.metrics.path,
-        handler: resolver.resolve("./runtime/server/routes/metrics.get"),
-      });
+    }
+
+    if (options.debugServer?.enabled) {
+      logger.info("debug server enabled");
+      addServerPlugin(resolver.resolve("./runtime/plugins/debugServer"));
+    } else {
+      if (options.metrics?.enabled) {
+        nuxt.options.runtimeConfig.public.metrics = {
+          path: options.metrics.path,
+        };
+        addServerHandler({
+          route: options.metrics.path,
+          handler: resolver.resolve("./runtime/server/routes/metrics.get"),
+        });
+      }
+
+      if (options.healthCheck?.enabled) {
+        logger.info("healthcheck enabled");
+        addServerHandler({
+          route: options.healthCheck.path,
+          handler: resolver.resolve("./runtime/server/routes/health"),
+        });
+      }
+
+      if (options.readyCheck?.enabled) {
+        logger.info("readycheck enabled");
+        addServerHandler({
+          route: options.readyCheck.path,
+          handler: resolver.resolve("./runtime/server/routes/ready"),
+        });
+      }
     }
   },
 });

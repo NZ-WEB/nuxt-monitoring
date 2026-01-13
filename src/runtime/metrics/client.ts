@@ -1,10 +1,12 @@
 import {
   Counter,
-  Histogram,
   Gauge,
   collectDefaultMetrics,
-  register,
+  Summary,
+  Registry,
 } from "prom-client";
+
+const register = new Registry();
 
 collectDefaultMetrics({ register });
 
@@ -15,11 +17,10 @@ const defaultMetrics = {
     labelNames: ["method", "route", "status_code"] as const,
     registers: [register],
   }),
-  httpRequestDuration: new Histogram({
+  httpRequestDuration: new Summary({
     name: "http_request_duration_seconds",
     help: "Duration of HTTP requests in seconds",
     labelNames: ["method", "route", "status_code"] as const,
-    buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 5, 10],
     registers: [register],
   }),
   activeRequests: new Gauge({
@@ -48,4 +49,4 @@ function collectMetrics(
   );
 }
 
-export { register, defaultMetrics, collectMetrics };
+export { defaultMetrics, collectMetrics, register };
