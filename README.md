@@ -25,20 +25,17 @@ A Nuxt module for deep observability, providing separate debug server, health ch
 - 🧩 &nbsp;**HMR & Graceful Shutdown**  
   Debug server integrates with Nuxt lifecycle and shuts down cleanly.
 
-## Default Metrics
+## Custom Metrics
 
-The module collects the following Prometheus metrics:
+The module collects the following HTTP metrics:
 
 | Metric Name | Type | Labels | Description |
 |------------|------|--------|-------------|
-| `process_cpu_usage` | Gauge | — | CPU usage by process |
-| `process_memory_usage` | Gauge | — | Memory usage by process |
-| `nodejs_eventloop_lag_seconds` | Summary | — | Event loop lag |
-| `http_request_total` | Counter | `method`, `route`, `status_code` | Total HTTP requests |
-| `http_request_duration_seconds` | Summary | `method`, `route`, `status_code` | Request duration in seconds |
+| `http_request_total` | Counter | `method`, `route`, `status_code` | Total number of HTTP requests |
+| `http_request_duration_seconds` | Summary | `method`, `route`, `status_code` | Duration of HTTP requests in seconds |
 | `http_active_requests` | Gauge | — | Number of active HTTP requests |
 
-> All Node.js default metrics from `prom-client` are also collected.
+Additionally, the module automatically collects standard Node.js runtime metrics (CPU, memory, event loop, etc.) via [`prom-client`](https://github.com/siimon/prom-client).
 
 ## Quick Setup
 
