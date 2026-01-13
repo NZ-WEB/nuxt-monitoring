@@ -1,5 +1,5 @@
 import { defineNitroPlugin, useRuntimeConfig } from "#imports";
-import { createApp, toNodeListener } from "h3";
+import { createApp, toNodeListener, type App } from "h3";
 import { createServer } from "node:http";
 import healthHandler from "../server/routes/health";
 import readyHandler from "../server/routes/ready";
@@ -8,9 +8,28 @@ import type { ModuleOptions } from "~/src/module";
 import { logger } from "../logger";
 
 export default defineNitroPlugin((nitroApp) => {
-  const app = createApp();
   const runtimeConfig = useRuntimeConfig();
   const config = runtimeConfig.public.monitoring as ModuleOptions;
+  const app = createDebuggerApp(config);
+  const server = createDebugServer(app, config);
+
+  nitroApp.hooks.hook("close", () => {
+    logger.info("closing alive server...");
+    return new Promise<void>((resolve) => {
+      server.close((error) => {
+        if (error) {
+          logger.error("error closing debug server:", error);
+        } else {
+          logger.log("debug server closed");
+        }
+        resolve();
+      });
+    });
+  });
+});
+
+function createDebuggerApp(config: ModuleOptions) {
+  const app = createApp();
 
   if (config.healthCheck?.enabled) {
     logger.info("healthcheck enabled");
@@ -26,6 +45,10 @@ export default defineNitroPlugin((nitroApp) => {
     app.use(config.metrics.path, metricsHandler);
   }
 
+  return app;
+}
+
+function createDebugServer(app: App, config: ModuleOptions) {
   const listener = toNodeListener(app);
   const debugServerInstance = createServer(listener);
 
@@ -39,19 +62,7 @@ export default defineNitroPlugin((nitroApp) => {
     );
   });
 
-  const cleanup = () => {
-    logger.info("closing alive server...");
-    return new Promise<void>((resolve) => {
-      debugServerInstance.close((error) => {
-        if (error) {
-          logger.error("error closing debug server:", error);
-        } else {
-          logger.log("debug server closed");
-        }
-        resolve();
-      });
-    });
+  return {
+    close: debugServerInstance.close,
   };
-
-  nitroApp.hooks.hook("close", cleanup);
-});
+}

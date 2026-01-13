@@ -60,7 +60,6 @@ export default defineNuxtModule<ModuleOptions>({
   defaults,
   async setup(options, nuxt) {
     const resolver = createResolver(import.meta.url);
-
     nuxt.options.runtimeConfig.public.monitoring = options;
 
     if (options.metrics?.enabled) {
@@ -93,7 +92,7 @@ export default defineNuxtModule<ModuleOptions>({
       }
 
       if (options.readyCheck?.enabled) {
-        logger.info("readycheck enabled");
+        logger.info("readycheck enabled on");
         addServerHandler({
           route: options.readyCheck.path,
           handler: resolver.resolve("./runtime/server/routes/ready"),
