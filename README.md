@@ -5,31 +5,87 @@
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
-A Nuxt module for monitoring application health, collecting metrics, and enhancing observability in production applications.
+A Nuxt module for deep observability, providing separate debug server, health checks, and comprehensive metrics collection.
 
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
 
 ## Features
 
-- 📊 &nbsp;Collects Prometheus-style metrics (HTTP requests, performance, custom counters)
-- 🩺 &nbsp;Provides `/health` and `/ready` endpoints for liveness and readiness probes
-- 📜 &nbsp;Integrated logging with structured output via `consola`
-- 🛠️ &nbsp;Debug plugin for server-side development insights
-- 🌐 &nbsp;Supports both server and client-side instrumentation
+- 🖥️ &nbsp;**Debug Server**  
+  Runs on a separate port (default: 3001), hosting `/health`, `/ready`, and `/metrics` endpoints independently from the main app. Supports HMR and graceful shutdown.
+- 📊 &nbsp;**Metrics Collection**  
+  Collects both standard Node.js runtime metrics and custom HTTP metrics:
+  - Total HTTP requests (`http_request_total`)
+  - Request duration (`http_request_duration_seconds`)
+  - Active requests count (`http_active_requests`)
+- ✅ &nbsp;**Health & Readiness Probes**  
+  Configurable `/health` and `/ready` endpoints with custom paths.
+- 🔧 &nbsp;**Flexible Configuration**  
+  Enable/disable metrics, debug server, and customize endpoint paths.
+- 🧩 &nbsp;**HMR & Graceful Shutdown**  
+  Debug server integrates with Nuxt lifecycle and shuts down cleanly.
+
+## Default Metrics
+
+The module collects the following Prometheus metrics:
+
+| Metric Name | Type | Labels | Description |
+|------------|------|--------|-------------|
+| `process_cpu_usage` | Gauge | — | CPU usage by process |
+| `process_memory_usage` | Gauge | — | Memory usage by process |
+| `nodejs_eventloop_lag_seconds` | Summary | — | Event loop lag |
+| `http_request_total` | Counter | `method`, `route`, `status_code` | Total HTTP requests |
+| `http_request_duration_seconds` | Summary | `method`, `route`, `status_code` | Request duration in seconds |
+| `http_active_requests` | Gauge | — | Number of active HTTP requests |
+
+> All Node.js default metrics from `prom-client` are also collected.
 
 ## Quick Setup
 
-Install the module to your Nuxt application with one command:
+Install the module:
 
 ```bash
 npx nuxi module add nuxt-monitoring
 ```
 
-That's it! The module automatically sets up:
-- Metrics collection middleware
-- `/metrics` endpoint (Prometheus format)
-- `/health` and `/ready` status endpoints
-- Server-side logging infrastructure
+## Configuration
+
+Enable the debug server to expose metrics and health checks on a separate port:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['nuxt-monitoring'],
+  monitoring: {
+    debugServer: {
+      enabled: true,
+      port: 3001
+    }
+  }
+})
+```
+
+Or, keep endpoints on the main server:
+
+```ts
+export default defineNuxtConfig({
+  modules: ['nuxt-monitoring'],
+  monitoring: {
+    metrics: {
+      enabled: true,
+      path: '/metrics'
+    },
+    healthCheck: {
+      enabled: true,
+      path: '/health'
+    },
+    readyCheck: {
+      enabled: true,
+      path: '/ready'
+    }
+  }
+})
+```
 
 ## Contribution
 
@@ -64,7 +120,7 @@ That's it! The module automatically sets up:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE)
 
 <!-- Badges -->
 [npm-version-src]: https://img.shields.io/npm/v/nuxt-monitoring/latest.svg?style=flat&colorA=020420&colorB=00DC82
