@@ -1,8 +1,8 @@
 {
-  "name": "nuxt-metrics",
+  "name": "nuxt-monitoring",
   "version": "1.0.0",
   "description": "My new Nuxt module",
-  "repository": "your-org/my-module",
+  "repository": "your-org/nuxt-monitoring",
   "license": "MIT",
   "type": "module",
   "exports": {

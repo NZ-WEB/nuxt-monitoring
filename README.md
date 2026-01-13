@@ -1,11 +1,11 @@
-# nuxt-metrics
+# nuxt-monitoring
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
-A Nuxt module for collecting server and client metrics, providing health checks, and enhancing observability in production applications.
+A Nuxt module for monitoring application health, collecting metrics, and enhancing observability in production applications.
 
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
 
@@ -22,7 +22,7 @@ A Nuxt module for collecting server and client metrics, providing health checks,
 Install the module to your Nuxt application with one command:
 
 ```bash
-npx nuxi module add nuxt-metrics
+npx nuxi module add nuxt-monitoring
 ```
 
 That's it! The module automatically sets up:
@@ -67,14 +67,14 @@ That's it! The module automatically sets up:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/nuxt-metrics/latest.svg?style=flat&colorA=020420&colorB=00DC82
-[npm-version-href]: https://npmjs.com/package/nuxt-metrics
+[npm-version-src]: https://img.shields.io/npm/v/nuxt-monitoring/latest.svg?style=flat&colorA=020420&colorB=00DC82
+[npm-version-href]: https://npmjs.com/package/nuxt-monitoring
 
-[npm-downloads-src]: https://img.shields.io/npm/dm/nuxt-metrics.svg?style=flat&colorA=020420&colorB=00DC82
-[npm-downloads-href]: https://npm.chart.dev/nuxt-metrics
+[npm-downloads-src]: https://img.shields.io/npm/dm/nuxt-monitoring.svg?style=flat&colorA=020420&colorB=00DC82
+[npm-downloads-href]: https://npm.chart.dev/nuxt-monitoring
 
-[license-src]: https://img.shields.io/npm/l/nuxt-metrics.svg?style=flat&colorA=020420&colorB=00DC82
-[license-href]: https://npmjs.com/package/nuxt-metrics
+[license-src]: https://img.shields.io/npm/l/nuxt-monitoring.svg?style=flat&colorA=020420&colorB=00DC82
+[license-href]: https://npmjs.com/package/nuxt-monitoring
 
 [nuxt-src]: https://img.shields.io/badge/Nuxt-020420?logo=nuxt
 [nuxt-href]: https://nuxt.com
