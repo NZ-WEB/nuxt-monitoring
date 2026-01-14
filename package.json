@@ -42,7 +42,8 @@
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
     "release": "npm run lint && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
-    "commitlint": "commitlint --from=origin/main --to=HEAD",
+    "check": "nuxi typecheck",
+    "commitlint": "commitlint --edit $1",
     "prepare": "husky"
   },
   "dependencies": {
