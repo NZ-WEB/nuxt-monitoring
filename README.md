@@ -11,23 +11,20 @@ A Nuxt module for deep observability, providing separate debug server, health ch
 
 ## Features
 
-- 🖥️ &nbsp;**Debug Server**  
-  Runs on a separate port (default: 3001), hosting `/health`, `/ready`, and `/metrics` endpoints independently from the main app. Supports HMR and graceful shutdown.
-- 📊 &nbsp;**Metrics Collection**  
-  Collects both standard Node.js runtime metrics and custom HTTP metrics:
-  - Total HTTP requests (`http_request_total`)
-  - Request duration (`http_request_duration_seconds`)
-  - Active requests count (`http_active_requests`)
-- ✅ &nbsp;**Health & Readiness Probes**  
-  Configurable `/health` and `/ready` endpoints with custom paths.
-- 🔧 &nbsp;**Flexible Configuration**  
-  Enable/disable metrics, debug server, and customize endpoint paths.
-- 🧩 &nbsp;**HMR & Graceful Shutdown**  
-  Debug server integrates with Nuxt lifecycle and shuts down cleanly.
+- 🐞 &nbsp;Debug server for monitoring endpoints on a separate port
+- 🩺 &nbsp;/health endpoint for health checks
+- 🚀 &nbsp;/ready endpoint for readiness probes
+- 📊 &nbsp;Standard metrics collection via prom-client
+- ➕ &nbsp;Additional metrics collection
+- ✨ &nbsp;Ability to collect custom metrics
+- 🐢 &nbsp;Lazy loading of endpoints
 
-## Custom Metrics
+## Additional Metrics
 
-The module collects the following HTTP metrics:
+The module provides comprehensive metrics collection through the following categories:
+
+### HTTP Request Metrics
+The module automatically tracks key HTTP request metrics:
 
 | Metric Name | Type | Labels | Description |
 |------------|------|--------|-------------|
@@ -35,7 +32,19 @@ The module collects the following HTTP metrics:
 | `http_request_duration_seconds` | Summary | `method`, `route`, `status_code` | Duration of HTTP requests in seconds |
 | `http_active_requests` | Gauge | — | Number of active HTTP requests |
 
-Additionally, the module automatically collects standard Node.js runtime metrics (CPU, memory, event loop, etc.) via [`prom-client`](https://github.com/siimon/prom-client).
+### Standard Node.js Runtime Metrics
+Through integration with [`prom-client`](https://github.com/siimon/prom-client), the module automatically collects essential Node.js runtime metrics:
+- CPU usage and utilization
+- Memory usage (heap and system)
+- Event loop lag and duration
+- Garbage collection statistics
+- Node.js version and process information
+- OS-level metrics (platform, architecture, etc.)
+
+### Custom Metrics
+The module provides a flexible API for collecting custom metrics. Developers can define their own counters, gauges, histograms, and summaries to track application-specific business metrics or performance indicators.
+
+All metrics are exposed in the standard Prometheus format and can be scraped by any Prometheus-compatible monitoring system.
 
 ## Quick Setup
 
@@ -47,38 +56,46 @@ npx nuxi module add nuxt-monitoring
 
 ## Configuration
 
-Enable the debug server to expose metrics and health checks on a separate port:
+The module supports the following configuration options with these defaults:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['nuxt-monitoring'],
   monitoring: {
-    debugServer: {
+    // Metrics collection (enabled by default)
+    metrics: {
       enabled: true,
+      path: '/metrics'
+    },
+    // Health check endpoint (enabled by default)
+    healthCheck: {
+      enabled: true,
+      path: '/health'
+    },
+    // Readiness check endpoint (enabled by default)
+    readyCheck: {
+      enabled: true,
+      path: '/ready'
+    },
+    // Debug server on separate port (disabled by default)
+    debugServer: {
+      enabled: false,
       port: 3001
     }
   }
 })
 ```
 
-Or, keep endpoints on the main server:
+You can customize any of these options. For example, to enable the debug server:
 
 ```ts
 export default defineNuxtConfig({
   modules: ['nuxt-monitoring'],
   monitoring: {
-    metrics: {
+    debugServer: {
       enabled: true,
-      path: '/metrics'
-    },
-    healthCheck: {
-      enabled: true,
-      path: '/health'
-    },
-    readyCheck: {
-      enabled: true,
-      path: '/ready'
+      port: 3001
     }
   }
 })
