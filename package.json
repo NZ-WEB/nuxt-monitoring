@@ -1,6 +1,6 @@
 {
   "name": "nuxt-monitoring",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "description": "A Nuxt module for observability: debug server, health checks, and Prometheus metrics collection",
   "repository": "https://github.com/NZ-WEB/nuxt-monitoring",
   "license": "MIT",
@@ -40,7 +40,9 @@
     "dev": "npm run dev:prepare && nuxi dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "release": "npm run lint && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "release:patch": "npm run lint && npm run prepack && changelogen --release --patch && npm publish && git push --follow-tags",
+    "release:minor": "npm run lint && npm run prepack && changelogen --release --minor && npm publish && git push --follow-tags",
+    "release:major": "npm run lint && npm run prepack && changelogen --release --major && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "check": "nuxi typecheck",
     "commitlint": "commitlint --edit $1",
