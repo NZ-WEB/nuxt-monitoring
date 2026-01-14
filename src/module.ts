@@ -7,32 +7,30 @@ import {
 import { name, version } from "../package.json";
 import { logger } from "./runtime/logger";
 
-export interface MetricsConfig {
+export type DefaultItemConfig = {
   enabled: boolean;
   path: string;
-}
+};
 
-export interface HealthCheckConfig {
+export type MetricsConfig = DefaultItemConfig;
+export type HealthCheckConfig = DefaultItemConfig;
+export type ReadyCheckConfig = DefaultItemConfig;
+export type DebugServerConfig = {
   enabled: boolean;
-  path: string;
-}
+  port: number;
+};
 
-export interface ReadyCheckConfig {
-  enabled: boolean;
-  path: string;
-}
-
-export interface ModuleOptions {
+export interface ModuleConfig {
   metrics: MetricsConfig;
   healthCheck: HealthCheckConfig;
   readyCheck: ReadyCheckConfig;
-  debugServer?: {
-    enabled: boolean;
-    port: number;
-  };
+  debugServer: DebugServerConfig;
 }
+export type ModuleOptions = {
+  [K in keyof ModuleConfig]: Partial<ModuleConfig[K]>;
+};
 
-const defaults = {
+const defaults: ModuleConfig = {
   metrics: {
     enabled: true,
     path: "/metrics",

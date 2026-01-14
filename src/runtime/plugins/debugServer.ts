@@ -1,16 +1,14 @@
-import { defineNitroPlugin, useRuntimeConfig } from "#imports";
+import { useRuntimeConfig } from "#imports";
+import { defineNitroPlugin } from "nitropack/runtime";
 import { createApp, toNodeListener, type App } from "h3";
 import { createServer } from "node:http";
-import healthHandler from "../server/routes/health";
-import readyHandler from "../server/routes/ready";
-import metricsHandler from "../server/routes/metrics.get";
-import type { ModuleOptions } from "~/src/module";
+import type { ModuleConfig } from "~/src/module";
 import { logger } from "../logger";
 
-export default defineNitroPlugin((nitroApp) => {
+export default defineNitroPlugin(async (nitroApp) => {
   const runtimeConfig = useRuntimeConfig();
-  const config = runtimeConfig.public.monitoring as ModuleOptions;
-  const app = createDebuggerApp(config);
+  const config = runtimeConfig.public.monitoring as ModuleConfig;
+  const app = await createDebuggerApp(config);
   const server = createDebugServer(app, config);
 
   nitroApp.hooks.hook("close", () => {
@@ -28,27 +26,36 @@ export default defineNitroPlugin((nitroApp) => {
   });
 });
 
-function createDebuggerApp(config: ModuleOptions) {
+async function createDebuggerApp(config: ModuleConfig) {
   const app = createApp();
 
   if (config.healthCheck?.enabled) {
     logger.info("healthcheck enabled");
+    const healthHandler = await import("../server/routes/health").then(
+      (r) => r.default,
+    );
     app.use(config.healthCheck.path, healthHandler);
   }
 
   if (config.readyCheck?.enabled) {
     logger.info("readycheck enabled");
+    const readyHandler = await import("../server/routes/ready").then(
+      (r) => r.default,
+    );
     app.use(config.readyCheck.path, readyHandler);
   }
 
   if (config.metrics?.enabled) {
+    const metricsHandler = await import("../server/routes/metrics.get").then(
+      (r) => r.default,
+    );
     app.use(config.metrics.path, metricsHandler);
   }
 
   return app;
 }
 
-function createDebugServer(app: App, config: ModuleOptions) {
+function createDebugServer(app: App, config: ModuleConfig) {
   const listener = toNodeListener(app);
   const debugServerInstance = createServer(listener);
 
