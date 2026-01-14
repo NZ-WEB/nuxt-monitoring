@@ -55,10 +55,16 @@
     "@nuxt/schema": "^4.2.2",
     "@types/node": "latest",
     "changelogen": "^0.6.2",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^9.39.2",
     "nuxt": "^4.2.2",
     "typescript": "~5.9.3",
     "vitest": "^4.0.16",
     "vue-tsc": "^3.2.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
