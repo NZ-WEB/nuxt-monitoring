@@ -1,6 +1,30 @@
 # Changelog
 
 
+## v1.0.0
+
+[compare changes](https://github.com/NZ-WEB/nuxt-monitoring/compare/v0.9.2...v1.0.0)
+
+### 🚀 Enhancements
+
+- **import:** Add async import chunks ([247a493](https://github.com/NZ-WEB/nuxt-monitoring/commit/247a493))
+
+### 📖 Documentation
+
+- Update readme ([05e173f](https://github.com/NZ-WEB/nuxt-monitoring/commit/05e173f))
+
+### 🏡 Chore
+
+- Rm test ci job ([06edb38](https://github.com/NZ-WEB/nuxt-monitoring/commit/06edb38))
+- **commitizen:** Add commitizen ([b3909d2](https://github.com/NZ-WEB/nuxt-monitoring/commit/b3909d2))
+- Add commitlint ([a90e09c](https://github.com/NZ-WEB/nuxt-monitoring/commit/a90e09c))
+- **commitlint:** Add commitlit ([0278f2e](https://github.com/NZ-WEB/nuxt-monitoring/commit/0278f2e))
+- Add release scripts ([62b0cdc](https://github.com/NZ-WEB/nuxt-monitoring/commit/62b0cdc))
+
+### ❤️ Contributors
+
+- Nzweb <nzkann1ball@gmail.com>
+
 ## v0.9.2
 
 [compare changes](https://github.com/NZ-WEB/nuxt-monitoring/compare/v0.9.1...v0.9.2)
