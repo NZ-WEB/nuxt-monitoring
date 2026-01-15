@@ -51,7 +51,7 @@ All metrics are exposed in the standard Prometheus format and can be scraped by 
 Install the module:
 
 ```bash
-npx nuxi module add nuxt-monitoring
+npm install nuxt-monitoring
 ```
 
 ## Configuration
