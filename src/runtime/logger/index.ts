@@ -1,7 +1,7 @@
-import { consola } from "consola";
+import { consola } from 'consola'
 
 export const logger = consola.create({
   defaults: {
-    tag: "nuxt-monitoring",
+    tag: 'nuxt-monitoring',
   },
-});
+})
