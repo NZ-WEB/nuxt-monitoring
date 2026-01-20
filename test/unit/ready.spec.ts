@@ -1,16 +1,17 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  vi,
-} from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // Мокаем h3
 vi.mock('h3', () => ({
   defineEventHandler: <T>(fn: T) => fn,
-  createError: (options: { statusCode: number, statusMessage?: string, message?: string, data?: unknown }) => {
-    const error = new Error(options.message || options.statusMessage) as Error & { statusCode: number, data?: unknown }
+  createError: (options: {
+    statusCode: number
+    statusMessage?: string
+    message?: string
+    data?: unknown
+  }) => {
+    const error = new Error(
+      options.message || options.statusMessage,
+    ) as Error & { statusCode: number, data?: unknown }
     error.statusCode = options.statusCode
     error.data = options.data
     return error
@@ -20,13 +21,15 @@ vi.mock('h3', () => ({
 describe('ready endpoint', () => {
   beforeEach(async () => {
     // Очищаем readiness checks перед каждым тестом
-    const { clearReadinessChecks } = await import('../../src/runtime/server/routes/ready')
+    const { clearReadinessChecks }
+      = await import('../../src/runtime/server/routes/ready')
     clearReadinessChecks()
   })
 
   describe('registerReadinessCheck', () => {
     it('должен регистрировать проверку готовности', async () => {
-      const { registerReadinessCheck, clearReadinessChecks } = await import('../../src/runtime/server/routes/ready')
+      const { registerReadinessCheck, clearReadinessChecks }
+        = await import('../../src/runtime/server/routes/ready')
 
       const check = {
         name: 'database',
@@ -42,10 +45,8 @@ describe('ready endpoint', () => {
 
   describe('clearReadinessChecks', () => {
     it('должен очищать все зарегистрированные проверки', async () => {
-      const {
-        registerReadinessCheck,
-        clearReadinessChecks,
-      } = await import('../../src/runtime/server/routes/ready')
+      const { registerReadinessCheck, clearReadinessChecks }
+        = await import('../../src/runtime/server/routes/ready')
 
       registerReadinessCheck({ name: 'test1', check: () => true })
       registerReadinessCheck({ name: 'test2', check: () => true })
@@ -67,10 +68,14 @@ describe('ready endpoint', () => {
     })
 
     it('должен возвращать status ready когда все проверки прошли', async () => {
-      const { registerReadinessCheck, default: handler } = await import('../../src/runtime/server/routes/ready')
+      const { registerReadinessCheck, default: handler }
+        = await import('../../src/runtime/server/routes/ready')
 
       registerReadinessCheck({ name: 'db', check: () => true })
-      registerReadinessCheck({ name: 'cache', check: () => Promise.resolve(true) })
+      registerReadinessCheck({
+        name: 'cache',
+        check: () => Promise.resolve(true),
+      })
 
       const result = await handler()
 
@@ -84,19 +89,19 @@ describe('ready endpoint', () => {
     })
 
     it('должен выбрасывать ошибку 503 когда проверка не прошла', async () => {
-      const { registerReadinessCheck, default: handler } = await import('../../src/runtime/server/routes/ready')
+      const { registerReadinessCheck, default: handler }
+        = await import('../../src/runtime/server/routes/ready')
 
       registerReadinessCheck({ name: 'db', check: () => false })
 
-      await expect(handler())
-        .rejects
-        .toMatchObject({
-          statusCode: 503,
-        })
+      await expect(handler()).rejects.toMatchObject({
+        statusCode: 503,
+      })
     })
 
     it('должен обрабатывать исключения в проверках как failed', async () => {
-      const { registerReadinessCheck, default: handler } = await import('../../src/runtime/server/routes/ready')
+      const { registerReadinessCheck, default: handler }
+        = await import('../../src/runtime/server/routes/ready')
 
       registerReadinessCheck({
         name: 'failing',
@@ -105,15 +110,17 @@ describe('ready endpoint', () => {
         },
       })
 
-      await expect(handler())
-        .rejects
-        .toMatchObject({
-          statusCode: 503,
-        })
+      await expect(handler()).rejects.toMatchObject({
+        statusCode: 503,
+      })
     })
 
     it('должен обрабатывать async проверки', async () => {
-      const { registerReadinessCheck, clearReadinessChecks, default: handler } = await import('../../src/runtime/server/routes/ready')
+      const {
+        registerReadinessCheck,
+        clearReadinessChecks,
+        default: handler,
+      } = await import('../../src/runtime/server/routes/ready')
 
       clearReadinessChecks()
 

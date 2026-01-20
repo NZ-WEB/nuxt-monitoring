@@ -10,6 +10,12 @@ import { name, version } from '../package.json'
 import { logger } from './runtime/logger'
 
 export type { ReadinessCheck } from './runtime/server/routes/ready'
+export type { HealthState } from './runtime/server/routes/health'
+export {
+  setHealthError,
+  clearHealthError,
+  getHealthState,
+} from './runtime/server/routes/health'
 
 export interface DefaultItemConfig {
   enabled: boolean
@@ -35,7 +41,7 @@ export interface ModuleConfig {
 }
 
 export type ModuleOptions = {
-  [K in keyof ModuleConfig]: Partial<ModuleConfig[K]>
+  [K in keyof ModuleConfig]: Partial<ModuleConfig[K]>;
 }
 
 const defaults: ModuleConfig = {

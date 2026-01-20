@@ -50,7 +50,10 @@ export default defineEventHandler(async (event) => {
         const durationSec = durationMs / 1000
         const statusCode = event.node.res.statusCode
 
-        collectMetrics({ method: event.method, route, statusCode }, durationSec)
+        collectMetrics(
+          { method: event.method, route, statusCode },
+          durationSec,
+        )
       }
       catch (error) {
         logger.error('Failed to collect metrics:', error)

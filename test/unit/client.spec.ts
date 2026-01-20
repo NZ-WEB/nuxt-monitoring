@@ -1,10 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  vi,
-} from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { register } from 'prom-client'
 
 // Очищаем реестр перед каждым тестом
@@ -15,7 +9,8 @@ beforeEach(() => {
 describe('metrics/client', () => {
   describe('defaultMetrics', () => {
     it('должен экспортировать defaultMetrics с правильными метриками', async () => {
-      const { defaultMetrics } = await import('../../src/runtime/metrics/client')
+      const { defaultMetrics }
+        = await import('../../src/runtime/metrics/client')
 
       expect(defaultMetrics).toBeDefined()
       expect(defaultMetrics.httpRequestTotal).toBeDefined()
@@ -24,21 +19,26 @@ describe('metrics/client', () => {
     })
 
     it('httpRequestTotal должен быть Counter', async () => {
-      const { defaultMetrics } = await import('../../src/runtime/metrics/client')
+      const { defaultMetrics }
+        = await import('../../src/runtime/metrics/client')
 
       // Проверяем что это Counter через наличие метода inc
       expect(typeof defaultMetrics.httpRequestTotal.inc).toBe('function')
     })
 
     it('httpRequestDuration должен быть Summary', async () => {
-      const { defaultMetrics } = await import('../../src/runtime/metrics/client')
+      const { defaultMetrics }
+        = await import('../../src/runtime/metrics/client')
 
       // Проверяем что это Summary через наличие метода observe
-      expect(typeof defaultMetrics.httpRequestDuration.observe).toBe('function')
+      expect(typeof defaultMetrics.httpRequestDuration.observe).toBe(
+        'function',
+      )
     })
 
     it('activeRequests должен быть Gauge', async () => {
-      const { defaultMetrics } = await import('../../src/runtime/metrics/client')
+      const { defaultMetrics }
+        = await import('../../src/runtime/metrics/client')
 
       // Проверяем что это Gauge через наличие методов inc и dec
       expect(typeof defaultMetrics.activeRequests.inc).toBe('function')
@@ -48,7 +48,8 @@ describe('metrics/client', () => {
 
   describe('collectMetrics', () => {
     it('должен собирать метрики запроса', async () => {
-      const { collectMetrics, defaultMetrics } = await import('../../src/runtime/metrics/client')
+      const { collectMetrics, defaultMetrics }
+        = await import('../../src/runtime/metrics/client')
 
       const labels = {
         method: 'GET',
@@ -64,7 +65,8 @@ describe('metrics/client', () => {
       expect(counterMetric.values.length).toBeGreaterThan(0)
 
       const counterValue = counterMetric.values.find(
-        v => v.labels.method === 'GET'
+        v =>
+          v.labels.method === 'GET'
           && v.labels.route === '/api/test'
           && v.labels.status_code === 200,
       )
@@ -72,7 +74,8 @@ describe('metrics/client', () => {
     })
 
     it('должен увеличивать счётчик при множественных вызовах', async () => {
-      const { collectMetrics, defaultMetrics } = await import('../../src/runtime/metrics/client')
+      const { collectMetrics, defaultMetrics }
+        = await import('../../src/runtime/metrics/client')
 
       const labels = {
         method: 'POST',
@@ -86,7 +89,8 @@ describe('metrics/client', () => {
 
       const counterMetric = await defaultMetrics.httpRequestTotal.get()
       const counterValue = counterMetric.values.find(
-        v => v.labels.method === 'POST'
+        v =>
+          v.labels.method === 'POST'
           && v.labels.route === '/api/data'
           && v.labels.status_code === 201,
       )
@@ -96,7 +100,8 @@ describe('metrics/client', () => {
 
   describe('register', () => {
     it('должен экспортировать register из prom-client', async () => {
-      const { register: exportedRegister } = await import('../../src/runtime/metrics/client')
+      const { register: exportedRegister }
+        = await import('../../src/runtime/metrics/client')
 
       expect(exportedRegister).toBeDefined()
       expect(typeof exportedRegister.metrics).toBe('function')
@@ -106,7 +111,8 @@ describe('metrics/client', () => {
     it('должен возвращать метрики в формате Prometheus', async () => {
       // Реимпортируем модуль чтобы метрики были зарегистрированы заново
       vi.resetModules()
-      const { register: exportedRegister, collectMetrics } = await import('../../src/runtime/metrics/client')
+      const { register: exportedRegister, collectMetrics }
+        = await import('../../src/runtime/metrics/client')
 
       collectMetrics({ method: 'GET', route: '/', statusCode: 200 }, 0.1)
 
