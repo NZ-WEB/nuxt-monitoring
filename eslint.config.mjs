@@ -1,16 +1,15 @@
-import { createConfigForNuxt } from "@nuxt/eslint-config/flat";
+import { createConfigForNuxt } from '@nuxt/eslint-config/flat'
 
 export default createConfigForNuxt({
   features: {
     tooling: true,
-    stylistic: false,
+    stylistic: true,
   },
   dirs: {
-    src: ["./playground"],
+    src: ['./src', './playground'],
   },
 }).append({
   rules: {
-    "@typescript-eslint/no-explicit-any": "off",
-    "regexp/no-unused-capturing-group": "off",
+    'regexp/no-unused-capturing-group': 'off',
   },
-});
+})
