@@ -22,6 +22,9 @@
     ".": {
       "types": "./dist/types.d.mts",
       "import": "./dist/module.mjs"
+    },
+    "./runtime/server/routes/ready": {
+      "import": "./dist/runtime/server/routes/ready.mjs"
     }
   },
   "main": "./dist/module.mjs",
@@ -40,11 +43,15 @@
     "dev": "npm run dev:prepare && nuxi dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "release:patch": "npm run lint && npm run prepack && changelogen --release --patch && npm publish && git push --follow-tags",
-    "release:minor": "npm run lint && npm run prepack && changelogen --release --minor && npm publish && git push --follow-tags",
-    "release:major": "npm run lint && npm run prepack && changelogen --release --major && npm publish && git push --follow-tags",
+    "release:patch": "npm run lint && npm run test && npm run prepack && changelogen --release --patch && npm publish && git push --follow-tags",
+    "release:minor": "npm run lint && npm run test && npm run prepack && changelogen --release --minor && npm publish && git push --follow-tags",
+    "release:major": "npm run lint && npm run test && npm run prepack && changelogen --release --major && npm publish && git push --follow-tags",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "check": "nuxi typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "commitlint": "commitlint --edit $1",
     "prepare": "husky"
   },
