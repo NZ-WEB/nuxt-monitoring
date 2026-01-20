@@ -5,8 +5,25 @@ import {
   collectDefaultMetrics,
   register,
 } from 'prom-client'
+import type { PrometheusOverride } from '../../module'
 
-collectDefaultMetrics({ register })
+let initialized = false
+
+const initMetrics = (override?: PrometheusOverride) => {
+  if (initialized) {
+    return
+  }
+
+  collectDefaultMetrics({
+    register,
+    prefix: override?.prefix,
+    labels: override?.labels,
+    gcDurationBuckets: override?.gcDurationBuckets,
+    eventLoopMonitoringPrecision: override?.eventLoopMonitoringPrecision,
+  })
+
+  initialized = true
+}
 
 const defaultMetrics = {
   httpRequestTotal: new Counter({
@@ -45,4 +62,4 @@ const collectMetrics = (
   )
 }
 
-export { defaultMetrics, collectMetrics, register }
+export { defaultMetrics, collectMetrics, register, initMetrics }

@@ -25,7 +25,16 @@ export interface DefaultItemConfig {
   path: string
 }
 
-export type MetricsConfig = DefaultItemConfig
+export interface PrometheusOverride {
+  prefix?: string
+  labels?: Record<string, string>
+  gcDurationBuckets?: number[]
+  eventLoopMonitoringPrecision?: number
+}
+
+export interface MetricsConfig extends DefaultItemConfig {
+  override?: PrometheusOverride
+}
 export type HealthCheckConfig = DefaultItemConfig
 export interface ReadyCheckConfig extends DefaultItemConfig {
   checksFile?: string

@@ -1,6 +1,6 @@
 import { defineEventHandler, getRequestURL } from 'h3'
 import { useRuntimeConfig } from '#imports'
-import { collectMetrics, defaultMetrics } from '../../metrics/client'
+import { collectMetrics, defaultMetrics, initMetrics } from '../../metrics/client'
 import { logger } from '../../logger'
 import type { ModuleOptions } from '../../../module'
 
@@ -12,6 +12,8 @@ const isStaticAsset = (url: URL) => staticAssetExtensions.test(url.pathname)
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const monitoringConfig = config.public.monitoring as ModuleOptions
+
+  initMetrics(monitoringConfig.metrics?.override)
   const url = getRequestURL(event)
   const route = url.pathname
   const startTime = process.hrtime.bigint()
