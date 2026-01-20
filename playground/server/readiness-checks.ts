@@ -4,8 +4,8 @@ export default [
   {
     name: 'database',
     check: async () => {
-      // Пример: проверка подключения к БД
-      return false
+      // Пример: проверка подключения к БД с причиной ошибки
+      throw new Error('Connection timeout after 5000ms')
     },
   },
   {

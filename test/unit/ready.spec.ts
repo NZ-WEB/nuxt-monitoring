@@ -115,6 +115,30 @@ describe('ready endpoint', () => {
       })
     })
 
+    it('должен сохранять причину ошибки в reason', async () => {
+      const { registerReadinessCheck, default: handler }
+        = await import('../../src/runtime/server/routes/ready')
+
+      registerReadinessCheck({
+        name: 'database',
+        check: () => {
+          throw new Error('Database connection timeout')
+        },
+      })
+
+      try {
+        await handler()
+        expect.fail('Должен был выбросить ошибку')
+      }
+      catch (error: unknown) {
+        const err = error as { statusCode: number, data: { checks: Array<{ name: string, passed: boolean, reason?: string }> } }
+        expect(err.statusCode).toBe(503)
+        expect(err.data.checks).toEqual([
+          { name: 'database', passed: false, reason: 'Database connection timeout' },
+        ])
+      }
+    })
+
     it('должен обрабатывать async проверки', async () => {
       const {
         registerReadinessCheck,

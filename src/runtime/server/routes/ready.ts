@@ -5,6 +5,12 @@ export interface ReadinessCheck {
   check: () => Promise<boolean> | boolean
 }
 
+export interface ReadinessCheckResult {
+  name: string
+  passed: boolean
+  reason?: string
+}
+
 const readinessChecks: ReadinessCheck[] = []
 
 export const registerReadinessCheck = (check: ReadinessCheck) => {
@@ -20,14 +26,15 @@ export default defineEventHandler(async () => {
     return { status: 'ready' }
   }
 
-  const results = await Promise.all(
+  const results: ReadinessCheckResult[] = await Promise.all(
     readinessChecks.map(async ({ name, check }) => {
       try {
         const passed = await check()
         return { name, passed }
       }
-      catch {
-        return { name, passed: false }
+      catch (error) {
+        const reason = error instanceof Error ? error.message : String(error)
+        return { name, passed: false, reason }
       }
     }),
   )

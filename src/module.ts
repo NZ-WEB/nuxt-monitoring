@@ -9,7 +9,10 @@ import {
 import { name, version } from '../package.json'
 import { logger } from './runtime/logger'
 
-export type { ReadinessCheck } from './runtime/server/routes/ready'
+export type {
+  ReadinessCheck,
+  ReadinessCheckResult,
+} from './runtime/server/routes/ready'
 export type { HealthState } from './runtime/server/routes/health'
 export {
   setHealthError,
