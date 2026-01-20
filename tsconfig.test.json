@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "paths": {
+      "#imports": ["./src/runtime/test-mocks/imports.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.spec.ts"],
+  "exclude": ["dist", "node_modules", "playground"]
+}
