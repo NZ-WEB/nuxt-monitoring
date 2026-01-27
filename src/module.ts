@@ -99,3 +99,11 @@ export default defineNuxtModule<ModuleOptions>({
     }
   },
 });
+
+// Экспорт API функций health check
+export {
+  setHealthError,
+  clearHealthError,
+  clearAllHealthErrors,
+  getHealthState,
+} from './runtime/health/state';

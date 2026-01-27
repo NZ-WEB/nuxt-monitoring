@@ -13,6 +13,7 @@ A Nuxt module for deep observability, providing separate debug server, health ch
 
 - 🐞 &nbsp;Debug server for monitoring endpoints on a separate port
 - 🩺 &nbsp;/health endpoint for health checks
+- 🎯 &nbsp;Программный API для управления состоянием health check
 - 🚀 &nbsp;/ready endpoint for readiness probes
 - 📊 &nbsp;Standard metrics collection via prom-client
 - ➕ &nbsp;Additional metrics collection
@@ -99,6 +100,128 @@ export default defineNuxtConfig({
     }
   }
 })
+```
+
+## Health Check API
+
+Модуль предоставляет программный API для управления состоянием health check. Это позволяет вашему приложению сообщать о проблемах и автоматически переводить health check в состояние ошибки.
+
+### Импорт функций
+
+```ts
+import {
+  setHealthError,
+  clearHealthError,
+  getHealthState,
+} from 'nuxt-monitoring'
+```
+
+### API функции
+
+#### `setHealthError(key: string, message: string, code?: string): void`
+
+Устанавливает ошибку health check по указанному ключу:
+
+```ts
+// Простая ошибка
+setHealthError('database', 'Не удалось подключиться к базе данных')
+
+// Ошибка с кодом
+setHealthError('external-api', 'Timeout при вызове внешнего API', 'TIMEOUT_ERROR')
+```
+
+После установки ошибки, endpoint `/health` начнет возвращать HTTP статус 503 (Service Unavailable) с детальной информацией об ошибках.
+
+#### `clearHealthError(key: string): void`
+
+Очищает ошибку health check по указанному ключу:
+
+```ts
+clearHealthError('database')
+```
+
+Если после очистки ошибки других ошибок не остается, health check автоматически переходит в состояние "здоров" (HTTP 200).
+
+#### `getHealthState()`
+
+Возвращает текущее состояние health check:
+
+```ts
+const state = getHealthState()
+console.log(state)
+// {
+//   isHealthy: false,
+//   errors: {
+//     'database': {
+//       message: 'Не удалось подключиться к базе данных',
+//       code: 'DB_CONNECTION_ERROR',
+//       timestamp: 1643723400000
+//     }
+//   }
+// }
+```
+
+### Примеры использования
+
+#### Мониторинг подключения к базе данных
+
+```ts
+// В коде подключения к БД
+export const connectToDatabase = async () => {
+  try {
+    await database.connect()
+    clearHealthError('database') // Очищаем ошибку при успешном подключении
+  } catch (error) {
+    setHealthError('database', 'Не удалось подключиться к базе данных', 'DB_ERROR')
+    throw error
+  }
+}
+```
+
+#### Мониторинг внешних сервисов
+
+```ts
+// В HTTP middleware или периодической задаче
+export const checkExternalServices = async () => {
+  try {
+    await fetch('https://external-api.example.com/health')
+    clearHealthError('external-api')
+  } catch (error) {
+    setHealthError('external-api', 'Внешний сервис недоступен', 'EXTERNAL_SERVICE_DOWN')
+  }
+}
+```
+
+#### Использование в server middleware
+
+```ts
+// server/middleware/health-monitoring.ts
+export default defineEventHandler(async (event) => {
+  // Проверяем критичные компоненты
+  if (!await checkDatabaseConnection()) {
+    setHealthError('database', 'База данных недоступна')
+  } else {
+    clearHealthError('database')
+  }
+})
+```
+
+### Поведение Health Check Endpoint
+
+- **Здоровое состояние**: HTTP 200 с `{ "status": "ok" }`
+- **Ошибка**: HTTP 503 с детальной информацией об ошибках
+
+```json
+{
+  "status": "error",
+  "errors": {
+    "database": {
+      "message": "Не удалось подключиться к базе данных",
+      "code": "DB_ERROR",
+      "timestamp": 1643723400000
+    }
+  }
+}
 ```
 
 ## Contribution
