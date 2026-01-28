@@ -63,7 +63,11 @@
         <div v-if="healthEndpointResult" class="result">
           <h4>/health endpoint result:</h4>
           <p><strong>URL:</strong> {{ healthEndpointResult.url }}</p>
-          <p><strong>Status:</strong> {{ healthEndpointResult.status }}</p>
+          <p><strong>Status:</strong>
+            <span :class="['status-code', getStatusClass(healthEndpointResult.status)]">
+              {{ healthEndpointResult.status }}
+            </span>
+          </p>
           <pre>{{ JSON.stringify(healthEndpointResult.data, null, 2) }}</pre>
         </div>
       </div>
@@ -84,7 +88,11 @@
         <div v-if="readyEndpointResult" class="result">
           <h4>/ready endpoint result:</h4>
           <p><strong>URL:</strong> {{ readyEndpointResult.url }}</p>
-          <p><strong>Status:</strong> {{ readyEndpointResult.status }}</p>
+          <p><strong>Status:</strong>
+            <span :class="['status-code', getStatusClass(readyEndpointResult.status)]">
+              {{ readyEndpointResult.status }}
+            </span>
+          </p>
           <pre>{{ JSON.stringify(readyEndpointResult.data, null, 2) }}</pre>
         </div>
       </div>
@@ -105,7 +113,11 @@
         <div v-if="metricsEndpointResult" class="result">
           <h4>/metrics endpoint result:</h4>
           <p><strong>URL:</strong> {{ metricsEndpointResult.url }}</p>
-          <p><strong>Status:</strong> {{ metricsEndpointResult.status }}</p>
+          <p><strong>Status:</strong>
+            <span :class="['status-code', getStatusClass(metricsEndpointResult.status)]">
+              {{ metricsEndpointResult.status }}
+            </span>
+          </p>
 
           <div v-if="metricsEndpointResult.isMetrics && typeof metricsEndpointResult.data === 'string'" class="metrics-data">
             <p><em>Prometheus metrics:</em></p>
@@ -268,6 +280,16 @@ const testMetricsEndpoint = async () => {
       isMetrics: true,
     }
   }
+}
+
+const getStatusClass = (status: number | string) => {
+  const statusNum = typeof status === 'string' ? parseInt(status) : status
+
+  if (statusNum >= 200 && statusNum < 300) return 'success'
+  if (statusNum >= 300 && statusNum < 400) return 'redirect'
+  if (statusNum >= 400 && statusNum < 500) return 'client-error'
+  if (statusNum >= 500) return 'server-error'
+  return 'unknown'
 }
 
 // Load initial state only for health check
@@ -480,5 +502,37 @@ a:hover {
 .disabled {
   color: #9ca3af;
   text-decoration: line-through;
+}
+
+.status-code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.status-code.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-code.redirect {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-code.client-error {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-code.server-error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.status-code.unknown {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 </style>
