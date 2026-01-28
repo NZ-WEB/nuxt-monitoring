@@ -191,9 +191,6 @@ watch(activeTab, (newTab) => {
           >
             {{ healthState && !healthState.isHealthy ? 'Очистить ошибку' : 'Установить ошибку' }}
           </button>
-          <button @click="checkHealth" class="btn info">
-            Проверить состояние
-          </button>
           <button @click="testHealthEndpoint" class="btn primary">
             Тестировать /health endpoint
           </button>
