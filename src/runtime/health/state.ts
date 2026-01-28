@@ -1,16 +1,12 @@
-interface HealthError {
-  message: string
-  code?: string
-  timestamp: number
-}
+import type { HealthError, HealthState } from './types'
 
-interface HealthState {
+interface InternalHealthState {
   isHealthy: boolean
   errors: Map<string, HealthError>
 }
 
 // Global health check state
-const healthState: HealthState = {
+const healthState: InternalHealthState = {
   isHealthy: true,
   errors: new Map(),
 }
@@ -46,7 +42,7 @@ export const clearAllHealthErrors = (): void => {
 /**
  * Gets the current health check state
  */
-export const getHealthState = () => {
+export const getHealthState = (): HealthState => {
   return {
     isHealthy: healthState.isHealthy,
     errors: Object.fromEntries(healthState.errors),

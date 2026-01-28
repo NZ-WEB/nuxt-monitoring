@@ -107,3 +107,10 @@ export {
   clearAllHealthErrors,
   getHealthState,
 } from './runtime/health/state';
+
+// Export health check types
+export type {
+  HealthError,
+  HealthState,
+  HealthResponse,
+} from './runtime/health/types';
