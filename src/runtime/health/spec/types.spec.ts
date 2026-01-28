@@ -173,7 +173,7 @@ describe('Health Check Types', () => {
         }
 
         expect(state.errors[key]).toBeDefined()
-        expect(state.errors[key].message).toBe(`Error for key: ${key}`)
+        expect(state.errors[key]?.message).toBe(`Error for key: ${key}`)
       })
     })
 
