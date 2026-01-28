@@ -13,6 +13,7 @@ A Nuxt module for deep observability, providing separate debug server, health ch
 
 - 🐞 &nbsp;Debug server for monitoring endpoints on a separate port
 - 🩺 &nbsp;/health endpoint for health checks
+- 🎯 &nbsp;Programmatic API for health check state management
 - 🚀 &nbsp;/ready endpoint for readiness probes
 - 📊 &nbsp;Standard metrics collection via prom-client
 - ➕ &nbsp;Additional metrics collection
@@ -99,6 +100,128 @@ export default defineNuxtConfig({
     }
   }
 })
+```
+
+## Health Check API
+
+The module provides a programmatic API for managing health check state. This allows your application to report issues and automatically put the health check into an error state.
+
+### Import Functions
+
+```ts
+import {
+  setHealthError,
+  clearHealthError,
+  getHealthState,
+} from 'nuxt-monitoring'
+```
+
+### API Functions
+
+#### `setHealthError(key: string, message: string, code?: string): void`
+
+Sets a health check error by the specified key:
+
+```ts
+// Simple error
+setHealthError('database', 'Failed to connect to database')
+
+// Error with code
+setHealthError('external-api', 'External API timeout', 'TIMEOUT_ERROR')
+```
+
+After setting an error, the `/health` endpoint will start returning HTTP status 503 (Service Unavailable) with detailed error information.
+
+#### `clearHealthError(key: string): void`
+
+Clears a health check error by the specified key:
+
+```ts
+clearHealthError('database')
+```
+
+If no other errors remain after clearing an error, the health check automatically transitions to a "healthy" state (HTTP 200).
+
+#### `getHealthState()`
+
+Returns the current health check state:
+
+```ts
+const state = getHealthState()
+console.log(state)
+// {
+//   isHealthy: false,
+//   errors: {
+//     'database': {
+//       message: 'Failed to connect to database',
+//       code: 'DB_CONNECTION_ERROR',
+//       timestamp: 1643723400000
+//     }
+//   }
+// }
+```
+
+### Usage Examples
+
+#### Database Connection Monitoring
+
+```ts
+// In database connection code
+export const connectToDatabase = async () => {
+  try {
+    await database.connect()
+    clearHealthError('database') // Clear error on successful connection
+  } catch (error) {
+    setHealthError('database', 'Failed to connect to database', 'DB_ERROR')
+    throw error
+  }
+}
+```
+
+#### External Service Monitoring
+
+```ts
+// In HTTP middleware or periodic task
+export const checkExternalServices = async () => {
+  try {
+    await fetch('https://external-api.example.com/health')
+    clearHealthError('external-api')
+  } catch (error) {
+    setHealthError('external-api', 'External service unavailable', 'EXTERNAL_SERVICE_DOWN')
+  }
+}
+```
+
+#### Server Middleware Usage
+
+```ts
+// server/middleware/health-monitoring.ts
+export default defineEventHandler(async (event) => {
+  // Check critical components
+  if (!await checkDatabaseConnection()) {
+    setHealthError('database', 'Database unavailable')
+  } else {
+    clearHealthError('database')
+  }
+})
+```
+
+### Health Check Endpoint Behavior
+
+- **Healthy state**: HTTP 200 with `{ "status": "ok" }`
+- **Error state**: HTTP 503 with detailed error information
+
+```json
+{
+  "status": "error",
+  "errors": {
+    "database": {
+      "message": "Failed to connect to database",
+      "code": "DB_ERROR",
+      "timestamp": 1643723400000
+    }
+  }
+}
 ```
 
 ## Contribution
