@@ -283,7 +283,7 @@ const testMetricsEndpoint = async () => {
 }
 
 const getStatusClass = (status: number | string) => {
-  const statusNum = typeof status === 'string' ? parseInt(status) : status
+  const statusNum = typeof status === 'string' ? Number.parseInt(status) : status
 
   if (statusNum >= 200 && statusNum < 300) return 'success'
   if (statusNum >= 300 && statusNum < 400) return 'redirect'
