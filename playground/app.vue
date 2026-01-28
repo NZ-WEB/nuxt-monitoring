@@ -40,6 +40,18 @@ const clearError = async () => {
   }
 }
 
+const toggleHealthError = async () => {
+  const hasErrors = healthState.value && !healthState.value.isHealthy
+
+  if (hasErrors) {
+    // Очищаем ошибку
+    await clearError()
+  } else {
+    // Устанавливаем ошибку
+    await setError()
+  }
+}
+
 const checkHealth = async () => {
   try {
     const state = await $fetch('/api/test-health', {
@@ -158,17 +170,26 @@ watch(activeTab, (newTab) => {
 
       <!-- Health Check вкладка -->
       <div v-if="activeTab === 'health'" class="tab-content">
-        <h3>Health Check API</h3>
+        <div class="header-with-status">
+          <h3>Health Check API</h3>
+          <div class="status-indicator" v-if="healthState">
+            <span
+              :class="['status-badge', healthState.isHealthy ? 'healthy' : 'unhealthy']"
+            >
+              {{ healthState.isHealthy ? '✅ Здоров' : '❌ Ошибка' }}
+            </span>
+          </div>
+        </div>
         <p class="description">
           Управление состоянием health check. Устанавливайте и очищайте ошибки, проверяйте текущее состояние.
         </p>
 
         <div class="buttons">
-          <button @click="setError" class="btn error">
-            Установить ошибку
-          </button>
-          <button @click="clearError" class="btn success">
-            Очистить ошибку
+          <button
+            @click="toggleHealthError"
+            :class="['btn', healthState && !healthState.isHealthy ? 'success' : 'error']"
+          >
+            {{ healthState && !healthState.isHealthy ? 'Очистить ошибку' : 'Установить ошибку' }}
           </button>
           <button @click="checkHealth" class="btn info">
             Проверить состояние
@@ -260,18 +281,6 @@ watch(activeTab, (newTab) => {
         <li><a href="http://localhost:3001/metrics" target="_blank">http://localhost:3001/metrics</a> - Prometheus metrics</li>
       </ul>
 
-      <h3>🚫 Основное приложение (порт 3000)</h3>
-      <p><em>Monitoring endpoints отключены, так как включен debug server</em></p>
-      <ul>
-        <li><span class="disabled">/health</span> - Health check (отключен)</li>
-        <li><span class="disabled">/ready</span> - Ready check (отключен)</li>
-        <li><span class="disabled">/metrics</span> - Prometheus metrics (отключен)</li>
-      </ul>
-
-      <h3>🧪 API для демонстрации (порт 3000)</h3>
-      <ul>
-        <li><a href="/api/test-health" target="_blank">/api/test-health</a> - API для тестирования health check функций</li>
-      </ul>
     </div>
   </div>
 </template>
@@ -321,6 +330,35 @@ watch(activeTab, (newTab) => {
 
 .tab-content {
   min-height: 400px;
+}
+
+.header-with-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.healthy {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.unhealthy {
+  background: #fef2f2;
+  color: #dc2626;
 }
 
 .description {
