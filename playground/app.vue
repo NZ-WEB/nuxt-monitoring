@@ -1,5 +1,6 @@
 
 <script setup lang="ts">
+const activeTab = ref('health')
 const healthState = ref(null)
 const healthEndpointResult = ref(null)
 const readyEndpointResult = ref(null)
@@ -51,93 +52,78 @@ const checkHealth = async () => {
   }
 }
 
-const useDebugServer = ref(true)
-
 const testHealthEndpoint = async () => {
-  const url = useDebugServer.value
-    ? '/api/proxy/health'
-    : '/health'
-  const description = useDebugServer.value
-    ? 'через прокси → debug server :3001'
-    : 'напрямую (недоступно)'
+  const url = '/api/proxy/health'
 
   try {
     const data = await $fetch(url)
     healthEndpointResult.value = {
       status: 200,
       data,
-      url: `${url} (${description})`,
+      url: `${url} → debug server :3001`,
     }
   } catch (error: any) {
     healthEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
-      url: `${url} (${description})`,
+      url: `${url} → debug server :3001`,
     }
   }
 }
 
 const testReadyEndpoint = async () => {
-  const url = useDebugServer.value
-    ? '/api/proxy/ready'
-    : '/ready'
-  const description = useDebugServer.value
-    ? 'через прокси → debug server :3001'
-    : 'напрямую (недоступно)'
+  const url = '/api/proxy/ready'
 
   try {
     const data = await $fetch(url)
     readyEndpointResult.value = {
       status: 200,
       data,
-      url: `${url} (${description})`,
+      url: `${url} → debug server :3001`,
     }
   } catch (error: any) {
     readyEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
-      url: `${url} (${description})`,
+      url: `${url} → debug server :3001`,
     }
   }
 }
 
 const testMetricsEndpoint = async () => {
-  const url = useDebugServer.value
-    ? '/api/proxy/metrics'
-    : '/metrics'
-  const description = useDebugServer.value
-    ? 'через прокси → debug server :3001'
-    : 'напрямую (недоступно)'
+  const url = '/api/proxy/metrics'
 
   try {
     const data = await $fetch(url)
     metricsEndpointResult.value = {
       status: 200,
       data,
-      url: `${url} (${description})`,
+      url: `${url} → debug server :3001`,
       isMetrics: true, // Флаг для особого отображения метрик
     }
   } catch (error: any) {
     metricsEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
-      url: `${url} (${description})`,
+      url: `${url} → debug server :3001`,
       isMetrics: true,
     }
   }
 }
 
-const testAllEndpoints = async () => {
-  await Promise.all([
-    testHealthEndpoint(),
-    testReadyEndpoint(),
-    testMetricsEndpoint(),
-  ])
-}
 
-// Загружаем начальное состояние
+// Загружаем начальное состояние только для health check
 onMounted(() => {
-  checkHealth()
+  if (activeTab.value === 'health') {
+    checkHealth()
+  }
+})
+
+// Загружаем состояние при переключении на вкладку health
+watch(activeTab, (newTab) => {
+  if (newTab === 'health' && !healthState.value) {
+    checkHealth()
+  }
 })
 </script>
 
@@ -148,75 +134,109 @@ onMounted(() => {
     <div class="section">
       <h2>Monitoring API Test</h2>
 
-      <div class="controls">
-        <div class="toggle-group">
-          <label>
-            <input type="checkbox" v-model="useDebugServer" />
-            Использовать Debug Server через прокси (рекомендовано)
-          </label>
-          <small class="help-text">
-            Включено: запросы идут через прокси API → debug server (порт 3001)<br>
-            Отключено: прямые запросы (будут падать, так как endpoints отключены на основном порту)
-          </small>
+      <!-- Навигация по табам -->
+      <div class="tabs">
+        <button
+          @click="activeTab = 'health'"
+          :class="['tab', { active: activeTab === 'health' }]"
+        >
+          🩺 Health Check API
+        </button>
+        <button
+          @click="activeTab = 'ready'"
+          :class="['tab', { active: activeTab === 'ready' }]"
+        >
+          🚀 Ready Check
+        </button>
+        <button
+          @click="activeTab = 'metrics'"
+          :class="['tab', { active: activeTab === 'metrics' }]"
+        >
+          📊 Prometheus Metrics
+        </button>
+      </div>
+
+      <!-- Health Check вкладка -->
+      <div v-if="activeTab === 'health'" class="tab-content">
+        <h3>Health Check API</h3>
+        <p class="description">
+          Управление состоянием health check. Устанавливайте и очищайте ошибки, проверяйте текущее состояние.
+        </p>
+
+        <div class="buttons">
+          <button @click="setError" class="btn error">
+            Установить ошибку
+          </button>
+          <button @click="clearError" class="btn success">
+            Очистить ошибку
+          </button>
+          <button @click="checkHealth" class="btn info">
+            Проверить состояние
+          </button>
+          <button @click="testHealthEndpoint" class="btn primary">
+            Тестировать /health endpoint
+          </button>
+        </div>
+
+        <div v-if="healthState" class="result">
+          <h4>Текущее состояние:</h4>
+          <pre>{{ JSON.stringify(healthState, null, 2) }}</pre>
+        </div>
+
+        <div v-if="healthEndpointResult" class="result">
+          <h4>Результат /health endpoint:</h4>
+          <p><strong>URL:</strong> {{ healthEndpointResult.url }}</p>
+          <p><strong>Статус:</strong> {{ healthEndpointResult.status }}</p>
+          <pre>{{ JSON.stringify(healthEndpointResult.data, null, 2) }}</pre>
         </div>
       </div>
 
-      <div class="buttons">
-        <button @click="setError" class="btn error">
-          Установить ошибку
-        </button>
-        <button @click="clearError" class="btn success">
-          Очистить ошибку
-        </button>
-        <button @click="checkHealth" class="btn info">
-          Проверить состояние
-        </button>
-      </div>
+      <!-- Ready Check вкладка -->
+      <div v-if="activeTab === 'ready'" class="tab-content">
+        <h3>Ready Check</h3>
+        <p class="description">
+          Проверка готовности приложения. Этот endpoint показывает, готово ли приложение обслуживать запросы.
+        </p>
 
-      <div class="buttons endpoints">
-        <button @click="testHealthEndpoint" class="btn primary">
-          Тестировать /health
-        </button>
-        <button @click="testReadyEndpoint" class="btn secondary">
-          Тестировать /ready
-        </button>
-        <button @click="testMetricsEndpoint" class="btn tertiary">
-          Тестировать /metrics
-        </button>
-        <button @click="testAllEndpoints" class="btn quaternary">
-          🚀 Тестировать все endpoints
-        </button>
-      </div>
-
-      <div v-if="healthState" class="result">
-        <h3>Текущее состояние:</h3>
-        <pre>{{ JSON.stringify(healthState, null, 2) }}</pre>
-      </div>
-
-      <div v-if="healthEndpointResult" class="result">
-        <h3>Результат /health endpoint:</h3>
-        <p><strong>URL:</strong> {{ healthEndpointResult.url }}</p>
-        <p><strong>Статус:</strong> {{ healthEndpointResult.status }}</p>
-        <pre>{{ JSON.stringify(healthEndpointResult.data, null, 2) }}</pre>
-      </div>
-
-      <div v-if="readyEndpointResult" class="result">
-        <h3>Результат /ready endpoint:</h3>
-        <p><strong>URL:</strong> {{ readyEndpointResult.url }}</p>
-        <p><strong>Статус:</strong> {{ readyEndpointResult.status }}</p>
-        <pre>{{ JSON.stringify(readyEndpointResult.data, null, 2) }}</pre>
-      </div>
-
-      <div v-if="metricsEndpointResult" class="result">
-        <h3>Результат /metrics endpoint:</h3>
-        <p><strong>URL:</strong> {{ metricsEndpointResult.url }}</p>
-        <p><strong>Статус:</strong> {{ metricsEndpointResult.status }}</p>
-        <div v-if="metricsEndpointResult.isMetrics && typeof metricsEndpointResult.data === 'string'" class="metrics-data">
-          <p><em>Prometheus метрики (показаны первые 20 строк):</em></p>
-          <pre>{{ metricsEndpointResult.data.split('\n').slice(0, 20).join('\n') }}{{ metricsEndpointResult.data.split('\n').length > 20 ? '\n\n... (показано 20 из ' + metricsEndpointResult.data.split('\n').length + ' строк)' : '' }}</pre>
+        <div class="buttons">
+          <button @click="testReadyEndpoint" class="btn secondary">
+            Тестировать /ready endpoint
+          </button>
         </div>
-        <div v-else>
-          <pre>{{ JSON.stringify(metricsEndpointResult.data, null, 2) }}</pre>
+
+        <div v-if="readyEndpointResult" class="result">
+          <h4>Результат /ready endpoint:</h4>
+          <p><strong>URL:</strong> {{ readyEndpointResult.url }}</p>
+          <p><strong>Статус:</strong> {{ readyEndpointResult.status }}</p>
+          <pre>{{ JSON.stringify(readyEndpointResult.data, null, 2) }}</pre>
+        </div>
+      </div>
+
+      <!-- Metrics вкладка -->
+      <div v-if="activeTab === 'metrics'" class="tab-content">
+        <h3>Prometheus Metrics</h3>
+        <p class="description">
+          Просмотр метрик приложения в формате Prometheus. Включает HTTP запросы, использование памяти, CPU и другие системные метрики.
+        </p>
+
+        <div class="buttons">
+          <button @click="testMetricsEndpoint" class="btn tertiary">
+            Загрузить метрики
+          </button>
+        </div>
+
+        <div v-if="metricsEndpointResult" class="result">
+          <h4>Результат /metrics endpoint:</h4>
+          <p><strong>URL:</strong> {{ metricsEndpointResult.url }}</p>
+          <p><strong>Статус:</strong> {{ metricsEndpointResult.status }}</p>
+
+          <div v-if="metricsEndpointResult.isMetrics && typeof metricsEndpointResult.data === 'string'" class="metrics-data">
+            <p><em>Prometheus метрики:</em></p>
+            <pre class="metrics-output">{{ metricsEndpointResult.data }}</pre>
+          </div>
+          <div v-else>
+            <pre>{{ JSON.stringify(metricsEndpointResult.data, null, 2) }}</pre>
+          </div>
         </div>
       </div>
     </div>
@@ -271,35 +291,43 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-.controls {
-  margin-bottom: 15px;
-}
-
-.toggle-group {
-  background: #f8f9fa;
-  padding: 10px 15px;
-  border-radius: 4px;
-  border: 1px solid #e5e7eb;
-}
-
-.toggle-group label {
+.tabs {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+  gap: 2px;
+}
+
+.tab {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
   cursor: pointer;
   font-weight: 500;
-}
-
-.toggle-group input[type="checkbox"] {
-  margin: 0;
-}
-
-.help-text {
-  display: block;
-  margin-top: 5px;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s ease;
   color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+}
+
+.tab:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tab.active {
+  background: #3b82f6;
+  color: white;
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+.description {
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .buttons {
@@ -309,11 +337,6 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.buttons.endpoints {
-  margin-top: 15px;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 15px;
-}
 
 .btn {
   padding: 10px 15px;
@@ -351,12 +374,6 @@ onMounted(() => {
 .btn.tertiary {
   background: #10b981;
   color: white;
-}
-
-.btn.quaternary {
-  background: #f59e0b;
-  color: white;
-  font-weight: 600;
 }
 
 .btn:hover {
@@ -397,15 +414,32 @@ a:hover {
 }
 
 h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #374151;
+  font-size: 1.25rem;
+}
+
+h4 {
   margin-top: 20px;
   margin-bottom: 10px;
   color: #374151;
+  font-size: 1.1rem;
 }
 
-.metrics-data pre {
-  max-height: 300px;
+.metrics-data {
+  margin-top: 15px;
+}
+
+.metrics-output {
+  max-height: 500px;
   overflow-y: auto;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 15px;
+  border-radius: 4px;
+  white-space: pre-wrap;
 }
 </style>
