@@ -48,11 +48,7 @@ export default defineConfig({
 
     // Run tests in sequence to avoid interference
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true
-      }
-    },
+    singleFork: true,
 
     // Reporter configuration
     reporter: ['verbose', 'json'],
