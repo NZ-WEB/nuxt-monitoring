@@ -75,7 +75,7 @@ describe('Metrics Middleware', () => {
         '/__build'
       ]
 
-      for (const path of internalPaths) {
+      await Promise.all(internalPaths.map(async (path) => {
         const event = createMockEvent('GET', path)
         const result = await metricsMiddleware(event)
 
@@ -83,13 +83,13 @@ describe('Metrics Middleware', () => {
         expect(mockDefaultMetrics.activeRequests.inc).not.toHaveBeenCalled()
 
         vi.clearAllMocks()
-      }
+      }))
     })
 
     it('should skip monitoring endpoints', async () => {
       const monitoringPaths = ['/metrics', '/health', '/ready']
 
-      for (const path of monitoringPaths) {
+      await Promise.all(monitoringPaths.map(async (path) => {
         const event = createMockEvent('GET', path)
         const result = await metricsMiddleware(event)
 
@@ -97,7 +97,7 @@ describe('Metrics Middleware', () => {
         expect(mockDefaultMetrics.activeRequests.inc).not.toHaveBeenCalled()
 
         vi.clearAllMocks()
-      }
+      }))
     })
 
     it('should skip static assets', async () => {
@@ -110,14 +110,14 @@ describe('Metrics Middleware', () => {
         '/data.json'
       ]
 
-      for (const path of staticAssets) {
+      await Promise.all(staticAssets.map(async (path) => {
         vi.clearAllMocks() // Clear before each test
         const event = createMockEvent('GET', path)
         const result = await metricsMiddleware(event)
 
         expect(result).toBeUndefined()
         expect(mockDefaultMetrics.activeRequests.inc).not.toHaveBeenCalled()
-      }
+      }))
     })
 
     it('should process API and regular routes', async () => {
@@ -129,14 +129,14 @@ describe('Metrics Middleware', () => {
         '/contact'
       ]
 
-      for (const path of regularPaths) {
+      await Promise.all(regularPaths.map(async (path) => {
         const event = createMockEvent('GET', path)
         await metricsMiddleware(event)
 
         expect(mockDefaultMetrics.activeRequests.inc).toHaveBeenCalledTimes(1)
 
         vi.clearAllMocks()
-      }
+      }))
     })
 
     it('should handle custom monitoring paths configuration', async () => {
@@ -152,7 +152,7 @@ describe('Metrics Middleware', () => {
 
       const customPaths = ['/custom-metrics', '/custom-health', '/custom-ready']
 
-      for (const path of customPaths) {
+      await Promise.all(customPaths.map(async (path) => {
         const event = createMockEvent('GET', path)
         const result = await metricsMiddleware(event)
 
@@ -160,7 +160,7 @@ describe('Metrics Middleware', () => {
         expect(mockDefaultMetrics.activeRequests.inc).not.toHaveBeenCalled()
 
         vi.clearAllMocks()
-      }
+      }))
     })
   })
 
@@ -208,7 +208,9 @@ describe('Metrics Middleware', () => {
       await metricsMiddleware(event)
 
       // Simulate some processing time
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise<void>(resolve => {
+        setTimeout(() => resolve(), 10)
+      })
 
       event.node.res.end()
 
@@ -233,7 +235,7 @@ describe('Metrics Middleware', () => {
       const testData = 'response data'
       event.node.res.end(testData, 'utf8')
 
-      expect(originalEnd).toHaveBeenCalledWith(testData, 'utf8', undefined)
+      expect(originalEnd).toHaveBeenCalledWith(testData, 'utf8', null)
     })
 
     it('should handle res.end with different parameter combinations', async () => {
@@ -249,7 +251,7 @@ describe('Metrics Middleware', () => {
 
       // Test case 1: no arguments
       event.node.res.end()
-      expect(originalEnd).toHaveBeenCalledWith(undefined, undefined, undefined)
+      expect(originalEnd).toHaveBeenCalledWith(null, null, null)
       vi.clearAllMocks()
 
       // Test case 2: only chunk
@@ -268,7 +270,7 @@ describe('Metrics Middleware', () => {
       // Middleware должен переставить аргументы, но vitest убирает undefined
       const lastCall = originalEnd.mock.calls[0]
       expect(lastCall?.[0]).toBe('data')
-      expect(lastCall?.[lastCall.length - 1]).toBe(callback) // callback должен быть последним аргументом
+      expect(lastCall?.at(-1)).toBe(callback) // callback должен быть последним аргументом
       vi.clearAllMocks()
 
       // Test case 5: chunk, encoding and callback
@@ -333,15 +335,15 @@ describe('Metrics Middleware', () => {
     it('should handle requests without method', async () => {
       const event = createMockEvent('GET', '/test')
 
-      // Мокируем геттер method чтобы он возвращал undefined
-      vi.spyOn(event, 'method', 'get').mockReturnValue(undefined as any)
+      // Мокируем геттер method чтобы он возвращал null
+      vi.spyOn(event, 'method', 'get').mockReturnValue(null as any)
 
       await metricsMiddleware(event)
       event.node.res.end()
 
       expect(mockCollectMetrics).toHaveBeenCalledWith(
         expect.objectContaining({
-          method: undefined
+          method: null
         }),
         expect.any(Number)
       )
@@ -354,7 +356,7 @@ describe('Metrics Middleware', () => {
       const mockHrtimeBigint = vi.spyOn(process.hrtime, 'bigint')
       let callCount = 0
       mockHrtimeBigint.mockImplementation(() => {
-        callCount++
+        callCount += 1
         return callCount === 1 ? 1000000000n : 1001000000n // 1ms difference in nanoseconds
       })
 
@@ -415,13 +417,13 @@ describe('Metrics Middleware', () => {
         { method: 'PUT', path: '/api/users/123', status: 204 }
       ]
 
-      for (const req of requests) {
+      await Promise.all(requests.map(async (req) => {
         const event = createMockEvent(req.method, req.path)
         await metricsMiddleware(event)
 
         event.node.res.statusCode = req.status
         event.node.res.end()
-      }
+      }))
 
       expect(mockCollectMetrics).toHaveBeenCalledTimes(3)
 

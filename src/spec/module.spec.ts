@@ -326,10 +326,10 @@ describe('Main Module', () => {
 
     it('should handle undefined configuration values', async () => {
       const optionsWithUndefined = {
-        metrics: undefined,
-        healthCheck: undefined,
-        readyCheck: undefined,
-        debugServer: undefined
+        metrics: null,
+        healthCheck: null,
+        readyCheck: null,
+        debugServer: null
       }
 
       await expect(moduleDefinition.setup(optionsWithUndefined, {

@@ -254,7 +254,7 @@ describe('Health Route Handler', () => {
     it('should handle multiple concurrent health checks', async () => {
       let callCount = 0
       mockGetHealthState.mockImplementation(() => {
-        callCount++
+        callCount += 1
         return {
           isHealthy: callCount % 2 === 0, // Alternate between healthy/unhealthy
           errors: callCount % 2 === 0 ? {} : { test: { message: 'test', timestamp: Date.now() } }

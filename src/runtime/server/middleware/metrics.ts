@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     isReadycheckPath ||
     isStaticAsset(url)
   )
-    return;
+    {return;}
 
   defaultMetrics.activeRequests.inc();
 
@@ -49,13 +49,14 @@ export default defineEventHandler(async (event) => {
 
     if (typeof encoding === "function") {
       callback = encoding;
+      // eslint-disable-next-line no-undefined
       encoding = undefined;
     }
     return originalEnd.call(
       this,
-      chunk || undefined,
+      chunk,
       encoding as BufferEncoding,
-      callback || undefined,
+      callback,
     );
   };
 });
