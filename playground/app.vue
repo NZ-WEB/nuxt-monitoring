@@ -2,6 +2,8 @@
 <script setup lang="ts">
 const healthState = ref(null)
 const healthEndpointResult = ref(null)
+const readyEndpointResult = ref(null)
+const metricsEndpointResult = ref(null)
 
 const setError = async () => {
   try {
@@ -75,6 +77,64 @@ const testHealthEndpoint = async () => {
   }
 }
 
+const testReadyEndpoint = async () => {
+  const url = useDebugServer.value
+    ? '/api/proxy/ready'
+    : '/ready'
+  const description = useDebugServer.value
+    ? 'через прокси → debug server :3001'
+    : 'напрямую (недоступно)'
+
+  try {
+    const data = await $fetch(url)
+    readyEndpointResult.value = {
+      status: 200,
+      data,
+      url: `${url} (${description})`,
+    }
+  } catch (error: any) {
+    readyEndpointResult.value = {
+      status: error.status || error.statusCode || 'unknown',
+      data: error.data || error.message || error,
+      url: `${url} (${description})`,
+    }
+  }
+}
+
+const testMetricsEndpoint = async () => {
+  const url = useDebugServer.value
+    ? '/api/proxy/metrics'
+    : '/metrics'
+  const description = useDebugServer.value
+    ? 'через прокси → debug server :3001'
+    : 'напрямую (недоступно)'
+
+  try {
+    const data = await $fetch(url)
+    metricsEndpointResult.value = {
+      status: 200,
+      data,
+      url: `${url} (${description})`,
+      isMetrics: true, // Флаг для особого отображения метрик
+    }
+  } catch (error: any) {
+    metricsEndpointResult.value = {
+      status: error.status || error.statusCode || 'unknown',
+      data: error.data || error.message || error,
+      url: `${url} (${description})`,
+      isMetrics: true,
+    }
+  }
+}
+
+const testAllEndpoints = async () => {
+  await Promise.all([
+    testHealthEndpoint(),
+    testReadyEndpoint(),
+    testMetricsEndpoint(),
+  ])
+}
+
 // Загружаем начальное состояние
 onMounted(() => {
   checkHealth()
@@ -86,7 +146,7 @@ onMounted(() => {
     <h1>Nuxt Monitoring Module Playground</h1>
 
     <div class="section">
-      <h2>Health Check API Test</h2>
+      <h2>Monitoring API Test</h2>
 
       <div class="controls">
         <div class="toggle-group">
@@ -111,8 +171,20 @@ onMounted(() => {
         <button @click="checkHealth" class="btn info">
           Проверить состояние
         </button>
+      </div>
+
+      <div class="buttons endpoints">
         <button @click="testHealthEndpoint" class="btn primary">
-          Тестировать /health endpoint
+          Тестировать /health
+        </button>
+        <button @click="testReadyEndpoint" class="btn secondary">
+          Тестировать /ready
+        </button>
+        <button @click="testMetricsEndpoint" class="btn tertiary">
+          Тестировать /metrics
+        </button>
+        <button @click="testAllEndpoints" class="btn quaternary">
+          🚀 Тестировать все endpoints
         </button>
       </div>
 
@@ -126,6 +198,26 @@ onMounted(() => {
         <p><strong>URL:</strong> {{ healthEndpointResult.url }}</p>
         <p><strong>Статус:</strong> {{ healthEndpointResult.status }}</p>
         <pre>{{ JSON.stringify(healthEndpointResult.data, null, 2) }}</pre>
+      </div>
+
+      <div v-if="readyEndpointResult" class="result">
+        <h3>Результат /ready endpoint:</h3>
+        <p><strong>URL:</strong> {{ readyEndpointResult.url }}</p>
+        <p><strong>Статус:</strong> {{ readyEndpointResult.status }}</p>
+        <pre>{{ JSON.stringify(readyEndpointResult.data, null, 2) }}</pre>
+      </div>
+
+      <div v-if="metricsEndpointResult" class="result">
+        <h3>Результат /metrics endpoint:</h3>
+        <p><strong>URL:</strong> {{ metricsEndpointResult.url }}</p>
+        <p><strong>Статус:</strong> {{ metricsEndpointResult.status }}</p>
+        <div v-if="metricsEndpointResult.isMetrics && typeof metricsEndpointResult.data === 'string'" class="metrics-data">
+          <p><em>Prometheus метрики (показаны первые 20 строк):</em></p>
+          <pre>{{ metricsEndpointResult.data.split('\n').slice(0, 20).join('\n') }}{{ metricsEndpointResult.data.split('\n').length > 20 ? '\n\n... (показано 20 из ' + metricsEndpointResult.data.split('\n').length + ' строк)' : '' }}</pre>
+        </div>
+        <div v-else>
+          <pre>{{ JSON.stringify(metricsEndpointResult.data, null, 2) }}</pre>
+        </div>
       </div>
     </div>
 
@@ -217,6 +309,12 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
+.buttons.endpoints {
+  margin-top: 15px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 15px;
+}
+
 .btn {
   padding: 10px 15px;
   border: none;
@@ -243,6 +341,22 @@ onMounted(() => {
 .btn.primary {
   background: #8b5cf6;
   color: white;
+}
+
+.btn.secondary {
+  background: #0ea5e9;
+  color: white;
+}
+
+.btn.tertiary {
+  background: #10b981;
+  color: white;
+}
+
+.btn.quaternary {
+  background: #f59e0b;
+  color: white;
+  font-weight: 600;
 }
 
 .btn:hover {
@@ -286,5 +400,12 @@ h3 {
   margin-top: 20px;
   margin-bottom: 10px;
   color: #374151;
+}
+
+.metrics-data pre {
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 </style>
