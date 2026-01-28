@@ -1,7 +1,8 @@
 import { defineEventHandler, setResponseStatus } from 'h3'
 import { getHealthState } from '../../health/state'
+import type { HealthResponse } from '../../health/types'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler((event): HealthResponse => {
   const healthState = getHealthState()
 
   if (!healthState.isHealthy) {
