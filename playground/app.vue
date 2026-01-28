@@ -1,50 +1,3 @@
-<template>
-  <div class="container">
-    <h1>Nuxt Monitoring Module Playground</h1>
-
-    <div class="section">
-      <h2>Health Check API Test</h2>
-
-      <div class="buttons">
-        <button @click="setError" class="btn error">
-          Установить ошибку
-        </button>
-        <button @click="clearError" class="btn success">
-          Очистить ошибку
-        </button>
-        <button @click="checkHealth" class="btn info">
-          Проверить состояние
-        </button>
-        <button @click="testHealthEndpoint" class="btn primary">
-          Тестировать /health endpoint
-        </button>
-      </div>
-
-      <div v-if="healthState" class="result">
-        <h3>Текущее состояние:</h3>
-        <pre>{{ JSON.stringify(healthState, null, 2) }}</pre>
-      </div>
-
-      <div v-if="healthEndpointResult" class="result">
-        <h3>Результат /health endpoint:</h3>
-        <p><strong>Статус:</strong> {{ healthEndpointResult.status }}</p>
-        <pre>{{ JSON.stringify(healthEndpointResult.data, null, 2) }}</pre>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Endpoints</h2>
-      <ul>
-        <li><a href="/health" target="_blank">/health</a> - Health check</li>
-        <li><a href="/ready" target="_blank">/ready</a> - Ready check</li>
-        <li><a href="/metrics" target="_blank">/metrics</a> - Prometheus metrics</li>
-        <li><a href="http://localhost:3001/health" target="_blank">Debug Server Health</a> (port 3001)</li>
-        <li><a href="http://localhost:3001/ready" target="_blank">Debug Server Ready</a> (port 3001)</li>
-        <li><a href="http://localhost:3001/metrics" target="_blank">Debug Server Metrics</a> (port 3001)</li>
-      </ul>
-    </div>
-  </div>
-</template>
 
 <script setup lang="ts">
 const healthState = ref(null)
@@ -96,17 +49,25 @@ const checkHealth = async () => {
   }
 }
 
+const useDebugServer = ref(true)
+
 const testHealthEndpoint = async () => {
+  const url = useDebugServer.value
+    ? 'http://localhost:3001/health'
+    : '/health'
+
   try {
-    const data = await $fetch('/health')
+    const data = await $fetch(url)
     healthEndpointResult.value = {
       status: 200,
       data,
+      url,
     }
   } catch (error: any) {
     healthEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
+      url,
     }
   }
 }
@@ -116,6 +77,76 @@ onMounted(() => {
   checkHealth()
 })
 </script>
+
+<template>
+  <div class="container">
+    <h1>Nuxt Monitoring Module Playground</h1>
+
+    <div class="section">
+      <h2>Health Check API Test</h2>
+
+      <div class="controls">
+        <div class="toggle-group">
+          <label>
+            <input type="checkbox" v-model="useDebugServer" />
+            Использовать Debug Server (port 3001)
+          </label>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button @click="setError" class="btn error">
+          Установить ошибку
+        </button>
+        <button @click="clearError" class="btn success">
+          Очистить ошибку
+        </button>
+        <button @click="checkHealth" class="btn info">
+          Проверить состояние
+        </button>
+        <button @click="testHealthEndpoint" class="btn primary">
+          Тестировать /health endpoint
+        </button>
+      </div>
+
+      <div v-if="healthState" class="result">
+        <h3>Текущее состояние:</h3>
+        <pre>{{ JSON.stringify(healthState, null, 2) }}</pre>
+      </div>
+
+      <div v-if="healthEndpointResult" class="result">
+        <h3>Результат /health endpoint:</h3>
+        <p><strong>URL:</strong> {{ healthEndpointResult.url }}</p>
+        <p><strong>Статус:</strong> {{ healthEndpointResult.status }}</p>
+        <pre>{{ JSON.stringify(healthEndpointResult.data, null, 2) }}</pre>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Endpoints</h2>
+
+      <h3>Debug Server (включен, порт 3001)</h3>
+      <ul>
+        <li><a href="http://localhost:3001/health" target="_blank">http://localhost:3001/health</a> - Health check</li>
+        <li><a href="http://localhost:3001/ready" target="_blank">http://localhost:3001/ready</a> - Ready check</li>
+        <li><a href="http://localhost:3001/metrics" target="_blank">http://localhost:3001/metrics</a> - Prometheus metrics</li>
+      </ul>
+
+      <h3>Основное приложение (порт 3000)</h3>
+      <p><em>Monitoring endpoints недоступны, так как включен debug server</em></p>
+      <ul>
+        <li><span class="disabled">/health</span> - Health check (отключен)</li>
+        <li><span class="disabled">/ready</span> - Ready check (отключен)</li>
+        <li><span class="disabled">/metrics</span> - Prometheus metrics (отключен)</li>
+      </ul>
+
+      <h3>API для демонстрации (порт 3000)</h3>
+      <ul>
+        <li><a href="/api/test-health" target="_blank">/api/test-health</a> - API для тестирования health check функций</li>
+      </ul>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .container {
@@ -130,6 +161,29 @@ onMounted(() => {
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
+}
+
+.controls {
+  margin-bottom: 15px;
+}
+
+.toggle-group {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.toggle-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.toggle-group input[type="checkbox"] {
+  margin: 0;
 }
 
 .buttons {
@@ -197,5 +251,16 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+.disabled {
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #374151;
 }
 </style>
