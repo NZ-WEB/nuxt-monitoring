@@ -28,7 +28,7 @@ export const useState = (key: string, init?: () => any) => {
   }
 }
 
-export const useCookie = (name: string) => {
+export const useCookie = (_name: string) => {
   return {
     value: undefined
   }

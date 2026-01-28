@@ -74,6 +74,7 @@ describe('Health Check Types', () => {
         'error.with.dots',
         'ERROR-WITH-DASHES',
         'MiXeD_cAsE_ErRoR',
+        // eslint-disable-next-line no-undefined
         undefined
       ]
 
@@ -85,6 +86,7 @@ describe('Health Check Types', () => {
         }
 
         expect(error.code).toBe(code)
+        // eslint-disable-next-line no-undefined
         if (code !== undefined) {
           expect(typeof error.code).toBe('string')
         }
@@ -173,13 +175,13 @@ describe('Health Check Types', () => {
         }
 
         expect(state.errors[key]).toBeDefined()
-        expect(state.errors[key].message).toBe(`Error for key: ${key}`)
+        expect(state.errors[key]?.message).toBe(`Error for key: ${key}`)
       })
     })
 
     it('should handle state with many errors', () => {
       const manyErrors: Record<string, HealthError> = {}
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 100; i += 1) {
         manyErrors[`error${i}`] = {
           message: `Error number ${i}`,
           code: `ERROR_${i}`,
@@ -333,9 +335,9 @@ describe('Health Check Types', () => {
       const convertToResponse = (state: HealthState): HealthResponse => {
         if (state.isHealthy) {
           return { status: 'ok' }
-        } else {
+        } 
           return { status: 'error', errors: state.errors }
-        }
+        
       }
 
       // Test healthy conversion
@@ -382,6 +384,7 @@ describe('Health Check Types', () => {
 
       const response: HealthResponse = {
         status: state.isHealthy ? 'ok' : 'error',
+        // eslint-disable-next-line no-undefined
         errors: state.isHealthy ? undefined : state.errors
       }
 

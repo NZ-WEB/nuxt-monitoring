@@ -37,9 +37,9 @@ describe('Health Check State Management', () => {
 
       expect(state.isHealthy).toBe(false)
       expect(state.errors['test-key']).toBeDefined()
-      expect(state.errors['test-key'].message).toBe('Test error message')
-      expect(state.errors['test-key'].code).toBeUndefined()
-      expect(typeof state.errors['test-key'].timestamp).toBe('number')
+      expect(state.errors['test-key']?.message).toBe('Test error message')
+      expect(state.errors['test-key']?.code).toBeUndefined()
+      expect(typeof state.errors['test-key']?.timestamp).toBe('number')
     })
 
     it('should set a health error with message and code', () => {
@@ -48,9 +48,9 @@ describe('Health Check State Management', () => {
 
       expect(state.isHealthy).toBe(false)
       expect(state.errors['db-error']).toBeDefined()
-      expect(state.errors['db-error'].message).toBe('Database connection failed')
-      expect(state.errors['db-error'].code).toBe('DB_CONNECTION_ERROR')
-      expect(typeof state.errors['db-error'].timestamp).toBe('number')
+      expect(state.errors['db-error']?.message).toBe('Database connection failed')
+      expect(state.errors['db-error']?.code).toBe('DB_CONNECTION_ERROR')
+      expect(typeof state.errors['db-error']?.timestamp).toBe('number')
     })
 
     it('should set multiple errors and keep all of them', () => {
@@ -60,23 +60,23 @@ describe('Health Check State Management', () => {
 
       expect(state.isHealthy).toBe(false)
       expect(Object.keys(state.errors)).toHaveLength(2)
-      expect(state.errors.db.message).toBe('DB error')
-      expect(state.errors.api.message).toBe('API error')
-      expect(state.errors.api.code).toBe('API_DOWN')
+      expect(state.errors.db?.message).toBe('DB error')
+      expect(state.errors.api?.message).toBe('API error')
+      expect(state.errors.api?.code).toBe('API_DOWN')
     })
 
     it('should overwrite existing error with same key', () => {
       setHealthError('test', 'First error')
-      const firstTimestamp = getHealthState().errors.test.timestamp
+      const firstTimestamp = getHealthState().errors.test?.timestamp
 
       // Wait a tiny bit to ensure timestamp difference
       setTimeout(() => {
         setHealthError('test', 'Second error', 'NEW_CODE')
         const state = getHealthState()
 
-        expect(state.errors.test.message).toBe('Second error')
-        expect(state.errors.test.code).toBe('NEW_CODE')
-        expect(state.errors.test.timestamp).toBeGreaterThanOrEqual(firstTimestamp)
+        expect(state.errors.test?.message).toBe('Second error')
+        expect(state.errors.test?.code).toBe('NEW_CODE')
+        expect(state.errors.test?.timestamp).toBeGreaterThanOrEqual(firstTimestamp || 0)
       }, 1)
     })
 
@@ -86,8 +86,8 @@ describe('Health Check State Management', () => {
       const afterTime = Date.now()
       const state = getHealthState()
 
-      expect(state.errors['timing-test'].timestamp).toBeGreaterThanOrEqual(beforeTime)
-      expect(state.errors['timing-test'].timestamp).toBeLessThanOrEqual(afterTime)
+      expect(state.errors['timing-test']?.timestamp).toBeGreaterThanOrEqual(beforeTime)
+      expect(state.errors['timing-test']?.timestamp).toBeLessThanOrEqual(afterTime)
     })
   })
 

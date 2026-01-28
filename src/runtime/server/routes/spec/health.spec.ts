@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { createEvent, createApp } from 'h3'
-import { IncomingMessage, ServerResponse } from 'http'
+import { createEvent } from 'h3'
+import { IncomingMessage, ServerResponse } from 'node:http'
 import healthHandler from '../health'
-import { setHealthError, clearAllHealthErrors } from '../../../health/state'
 
 // Mock the health state functions for isolated testing
 vi.mock('../../../health/state', () => ({
@@ -15,7 +14,7 @@ vi.mock('../../../health/state', () => ({
 describe('Health Route Handler', () => {
   let mockGetHealthState: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Get a fresh mock for each test
     const { getHealthState } = await import('../../../health/state')
     mockGetHealthState = getHealthState as any
@@ -106,10 +105,10 @@ describe('Health Route Handler', () => {
 
       expect(result.status).toBe('error')
       expect(result.errors).toEqual(mockErrors)
-      expect(result.errors['api'].message).toBe('External API timeout')
-      expect(result.errors['api'].code).toBe('API_TIMEOUT')
-      expect(result.errors['cache'].message).toBe('Redis connection failed')
-      expect(result.errors['cache']).not.toHaveProperty('code')
+      expect(result.errors?.['api']?.message).toBe('External API timeout')
+      expect(result.errors?.['api']?.code).toBe('API_TIMEOUT')
+      expect(result.errors?.['cache']?.message).toBe('Redis connection failed')
+      expect(result.errors?.['cache']).not.toHaveProperty('code')
     })
 
     it('should handle multiple errors correctly', async () => {
@@ -235,8 +234,8 @@ describe('Health Route Handler', () => {
 
       const event = createMockEvent()
 
-      // Handler should not throw, but we might need to handle this case
-      await expect(healthHandler(event)).rejects.toThrow('Health state error')
+      // Current implementation doesn't catch errors, so we expect the error to be thrown
+      expect(() => healthHandler(event)).toThrow('Health state error')
     })
 
     it('should handle malformed health state', async () => {
@@ -245,8 +244,9 @@ describe('Health Route Handler', () => {
 
       const event = createMockEvent()
 
-      // This should throw or handle gracefully depending on implementation
-      await expect(healthHandler(event)).rejects.toThrow()
+      // Current implementation doesn't check for null, so we expect TypeError when accessing isHealthy
+      expect(() => healthHandler(event)).toThrow(TypeError)
+      expect(() => healthHandler(event)).toThrow('Cannot read properties of null')
     })
   })
 
@@ -254,7 +254,7 @@ describe('Health Route Handler', () => {
     it('should handle multiple concurrent health checks', async () => {
       let callCount = 0
       mockGetHealthState.mockImplementation(() => {
-        callCount++
+        callCount += 1
         return {
           isHealthy: callCount % 2 === 0, // Alternate between healthy/unhealthy
           errors: callCount % 2 === 0 ? {} : { test: { message: 'test', timestamp: Date.now() } }

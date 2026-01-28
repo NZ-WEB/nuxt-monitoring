@@ -8,20 +8,20 @@
       <!-- Tab navigation -->
       <div class="tabs">
         <button
-          @click="activeTab = 'health'"
           :class="['tab', { active: activeTab === 'health' }]"
+          @click="activeTab = 'health'"
         >
           🩺 Health Check API
         </button>
         <button
-          @click="activeTab = 'ready'"
           :class="['tab', { active: activeTab === 'ready' }]"
+          @click="activeTab = 'ready'"
         >
           🚀 Ready Check
         </button>
         <button
-          @click="activeTab = 'metrics'"
           :class="['tab', { active: activeTab === 'metrics' }]"
+          @click="activeTab = 'metrics'"
         >
           📊 Prometheus Metrics
         </button>
@@ -31,7 +31,7 @@
       <div v-if="activeTab === 'health'" class="tab-content">
         <div class="header-with-status">
           <h3>Health Check API</h3>
-          <div class="status-indicator" v-if="healthState">
+          <div v-if="healthState" class="status-indicator">
             <span
               :class="['status-badge', healthState.isHealthy ? 'healthy' : 'unhealthy']"
             >
@@ -45,12 +45,12 @@
 
         <div class="buttons">
           <button
-            @click="toggleHealthError"
             :class="['btn', healthState && !healthState.isHealthy ? 'success' : 'error']"
+            @click="toggleHealthError"
           >
             {{ healthState && !healthState.isHealthy ? 'Clear Error' : 'Set Error' }}
           </button>
-          <button @click="testHealthEndpoint" class="btn primary">
+          <button class="btn primary" @click="testHealthEndpoint">
             Test /health endpoint
           </button>
         </div>
@@ -80,7 +80,7 @@
         </p>
 
         <div class="buttons">
-          <button @click="testReadyEndpoint" class="btn secondary">
+          <button class="btn secondary" @click="testReadyEndpoint">
             Test /ready endpoint
           </button>
         </div>
@@ -105,7 +105,7 @@
         </p>
 
         <div class="buttons">
-          <button @click="testMetricsEndpoint" class="btn tertiary">
+          <button class="btn tertiary" @click="testMetricsEndpoint">
             Load metrics
           </button>
         </div>
@@ -133,16 +133,8 @@
     <div class="section">
       <h2>Available Endpoints</h2>
 
-      <h3>🔄 Proxy API (port 3000) ← Debug Server (port 3001)</h3>
-      <p><em>CORS solution - requests are proxied to debug server</em></p>
-      <ul>
-        <li><a href="/api/proxy/health" target="_blank">/api/proxy/health</a> - Health check via proxy</li>
-        <li><a href="/api/proxy/ready" target="_blank">/api/proxy/ready</a> - Ready check via proxy</li>
-        <li><a href="/api/proxy/metrics" target="_blank">/api/proxy/metrics</a> - Prometheus metrics via proxy</li>
-      </ul>
-
-      <h3>🐞 Debug Server directly (port 3001)</h3>
-      <p><em>Direct requests - may cause CORS errors in browser</em></p>
+      <h3>🐞 Debug Server (port 3001) with CORS support</h3>
+      <p><em>Direct requests to debug server with configured CORS headers</em></p>
       <ul>
         <li><a href="http://localhost:3001/health" target="_blank">http://localhost:3001/health</a> - Health check</li>
         <li><a href="http://localhost:3001/ready" target="_blank">http://localhost:3001/ready</a> - Ready check</li>
@@ -224,66 +216,66 @@ const checkHealth = async () => {
 }
 
 const testHealthEndpoint = async () => {
-  const url = '/api/proxy/health'
+  const url = 'http://localhost:3001/health'
 
   try {
     const data = await $fetch(url)
     healthEndpointResult.value = {
       status: 200,
       data,
-      url: `${url} → debug server :3001`,
+      url: `${url} (debug server)`,
     }
   } catch (error: any) {
     healthEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
-      url: `${url} → debug server :3001`,
+      url: `${url} (debug server)`,
     }
   }
 }
 
 const testReadyEndpoint = async () => {
-  const url = '/api/proxy/ready'
+  const url = 'http://localhost:3001/ready'
 
   try {
     const data = await $fetch(url)
     readyEndpointResult.value = {
       status: 200,
       data,
-      url: `${url} → debug server :3001`,
+      url: `${url} (debug server)`,
     }
   } catch (error: any) {
     readyEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
-      url: `${url} → debug server :3001`,
+      url: `${url} (debug server)`,
     }
   }
 }
 
 const testMetricsEndpoint = async () => {
-  const url = '/api/proxy/metrics'
+  const url = 'http://localhost:3001/metrics'
 
   try {
     const data = await $fetch(url)
     metricsEndpointResult.value = {
       status: 200,
       data,
-      url: `${url} → debug server :3001`,
+      url: `${url} (debug server)`,
       isMetrics: true, // Flag for special metrics display
     }
   } catch (error: any) {
     metricsEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
-      url: `${url} → debug server :3001`,
+      url: `${url} (debug server)`,
       isMetrics: true,
     }
   }
 }
 
 const getStatusClass = (status: number | string) => {
-  const statusNum = typeof status === 'string' ? parseInt(status) : status
+  const statusNum = typeof status === 'string' ? Number.parseInt(status) : status
 
   if (statusNum >= 200 && statusNum < 300) return 'success'
   if (statusNum >= 300 && statusNum < 400) return 'redirect'
