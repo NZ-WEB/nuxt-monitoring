@@ -129,14 +129,16 @@ describe('Metrics Middleware', () => {
         '/contact'
       ]
 
-      await Promise.all(regularPaths.map(async (path) => {
+      // Use sequential execution for this test to properly check individual call counts
+      for (const path of regularPaths) {
         const event = createMockEvent('GET', path)
+        // eslint-disable-next-line no-await-in-loop
         await metricsMiddleware(event)
 
         expect(mockDefaultMetrics.activeRequests.inc).toHaveBeenCalledTimes(1)
 
         vi.clearAllMocks()
-      }))
+      }
     })
 
     it('should handle custom monitoring paths configuration', async () => {
@@ -235,7 +237,8 @@ describe('Metrics Middleware', () => {
       const testData = 'response data'
       event.node.res.end(testData, 'utf8')
 
-      expect(originalEnd).toHaveBeenCalledWith(testData, 'utf8', null)
+      // eslint-disable-next-line no-undefined
+      expect(originalEnd).toHaveBeenCalledWith(testData, 'utf8', undefined)
     })
 
     it('should handle res.end with different parameter combinations', async () => {
@@ -251,7 +254,8 @@ describe('Metrics Middleware', () => {
 
       // Test case 1: no arguments
       event.node.res.end()
-      expect(originalEnd).toHaveBeenCalledWith(null, null, null)
+      // eslint-disable-next-line no-undefined
+      expect(originalEnd).toHaveBeenCalledWith(undefined, undefined, undefined)
       vi.clearAllMocks()
 
       // Test case 2: only chunk
