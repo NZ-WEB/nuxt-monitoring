@@ -53,21 +53,24 @@ const useDebugServer = ref(true)
 
 const testHealthEndpoint = async () => {
   const url = useDebugServer.value
-    ? 'http://localhost:3001/health'
+    ? '/api/proxy/health'
     : '/health'
+  const description = useDebugServer.value
+    ? 'через прокси → debug server :3001'
+    : 'напрямую (недоступно)'
 
   try {
     const data = await $fetch(url)
     healthEndpointResult.value = {
       status: 200,
       data,
-      url,
+      url: `${url} (${description})`,
     }
   } catch (error: any) {
     healthEndpointResult.value = {
       status: error.status || error.statusCode || 'unknown',
       data: error.data || error.message || error,
-      url,
+      url: `${url} (${description})`,
     }
   }
 }
@@ -89,8 +92,12 @@ onMounted(() => {
         <div class="toggle-group">
           <label>
             <input type="checkbox" v-model="useDebugServer" />
-            Использовать Debug Server (port 3001)
+            Использовать Debug Server через прокси (рекомендовано)
           </label>
+          <small class="help-text">
+            Включено: запросы идут через прокси API → debug server (порт 3001)<br>
+            Отключено: прямые запросы (будут падать, так как endpoints отключены на основном порту)
+          </small>
         </div>
       </div>
 
@@ -123,24 +130,33 @@ onMounted(() => {
     </div>
 
     <div class="section">
-      <h2>Endpoints</h2>
+      <h2>Доступные Endpoints</h2>
 
-      <h3>Debug Server (включен, порт 3001)</h3>
+      <h3>🔄 Прокси API (порт 3000) ← Debug Server (порт 3001)</h3>
+      <p><em>Решение проблемы CORS - запросы проксируются на debug server</em></p>
+      <ul>
+        <li><a href="/api/proxy/health" target="_blank">/api/proxy/health</a> - Health check через прокси</li>
+        <li><a href="/api/proxy/ready" target="_blank">/api/proxy/ready</a> - Ready check через прокси</li>
+        <li><a href="/api/proxy/metrics" target="_blank">/api/proxy/metrics</a> - Prometheus metrics через прокси</li>
+      </ul>
+
+      <h3>🐞 Debug Server напрямую (порт 3001)</h3>
+      <p><em>Прямые запросы - могут вызывать CORS ошибки в браузере</em></p>
       <ul>
         <li><a href="http://localhost:3001/health" target="_blank">http://localhost:3001/health</a> - Health check</li>
         <li><a href="http://localhost:3001/ready" target="_blank">http://localhost:3001/ready</a> - Ready check</li>
         <li><a href="http://localhost:3001/metrics" target="_blank">http://localhost:3001/metrics</a> - Prometheus metrics</li>
       </ul>
 
-      <h3>Основное приложение (порт 3000)</h3>
-      <p><em>Monitoring endpoints недоступны, так как включен debug server</em></p>
+      <h3>🚫 Основное приложение (порт 3000)</h3>
+      <p><em>Monitoring endpoints отключены, так как включен debug server</em></p>
       <ul>
         <li><span class="disabled">/health</span> - Health check (отключен)</li>
         <li><span class="disabled">/ready</span> - Ready check (отключен)</li>
         <li><span class="disabled">/metrics</span> - Prometheus metrics (отключен)</li>
       </ul>
 
-      <h3>API для демонстрации (порт 3000)</h3>
+      <h3>🧪 API для демонстрации (порт 3000)</h3>
       <ul>
         <li><a href="/api/test-health" target="_blank">/api/test-health</a> - API для тестирования health check функций</li>
       </ul>
@@ -184,6 +200,14 @@ onMounted(() => {
 
 .toggle-group input[type="checkbox"] {
   margin: 0;
+}
+
+.help-text {
+  display: block;
+  margin-top: 5px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 .buttons {
