@@ -436,10 +436,12 @@ h4 {
   overflow-y: auto;
   font-size: 0.8rem;
   line-height: 1.3;
-  background: #1f2937;
-  color: #f9fafb;
+  background: #f8f9fa;
+  color: #1f2937;
   padding: 15px;
   border-radius: 4px;
+  border: 1px solid #e5e7eb;
   white-space: pre-wrap;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 </style>
