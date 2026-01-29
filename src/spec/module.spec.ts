@@ -61,15 +61,15 @@ describe('Main Module', () => {
     it('should have default configuration', () => {
       expect(moduleDefinition.defaults).toBeDefined()
       expect(moduleDefinition.defaults.metrics).toEqual({
-        enabled: true,
+        enabled: false,
         path: '/metrics'
       })
       expect(moduleDefinition.defaults.healthCheck).toEqual({
-        enabled: true,
+        enabled: false,
         path: '/health'
       })
       expect(moduleDefinition.defaults.readyCheck).toEqual({
-        enabled: true,
+        enabled: false,
         path: '/ready'
       })
       expect(moduleDefinition.defaults.debugServer).toEqual({
