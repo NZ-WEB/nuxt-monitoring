@@ -32,15 +32,15 @@ export type ModuleOptions = {
 
 const defaults: ModuleConfig = {
   metrics: {
-    enabled: true,
+    enabled: false,
     path: "/metrics",
   },
   healthCheck: {
-    enabled: true,
+    enabled: false,
     path: "/health",
   },
   readyCheck: {
-    enabled: true,
+    enabled: false,
     path: "/ready",
   },
   debugServer: {
