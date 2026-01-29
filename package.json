@@ -1,6 +1,6 @@
 {
   "name": "nuxt-monitoring",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A Nuxt module for observability: debug server, health checks, and Prometheus metrics collection",
   "repository": "https://github.com/NZ-WEB/nuxt-monitoring",
   "license": "MIT",
