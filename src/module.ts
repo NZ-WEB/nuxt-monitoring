@@ -32,15 +32,15 @@ export type ModuleOptions = {
 
 const defaults: ModuleConfig = {
   metrics: {
-    enabled: true,
+    enabled: false,
     path: "/metrics",
   },
   healthCheck: {
-    enabled: true,
+    enabled: false,
     path: "/health",
   },
   readyCheck: {
-    enabled: true,
+    enabled: false,
     path: "/ready",
   },
   debugServer: {
@@ -99,3 +99,18 @@ export default defineNuxtModule<ModuleOptions>({
     }
   },
 });
+
+// Export health check API functions
+export {
+  setHealthError,
+  clearHealthError,
+  clearAllHealthErrors,
+  getHealthState,
+} from './runtime/health/state';
+
+// Export health check types
+export type {
+  HealthError,
+  HealthState,
+  HealthResponse,
+} from './runtime/health/types';
