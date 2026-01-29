@@ -1,6 +1,48 @@
 # Changelog
 
 
+## v1.1.0
+
+[compare changes](https://github.com/NZ-WEB/nuxt-monitoring/compare/v0.9.2...v1.1.0)
+
+### 🚀 Enhancements
+
+- **import:** Add async import chunks ([247a493](https://github.com/NZ-WEB/nuxt-monitoring/commit/247a493))
+- Add Health Check API for programmatic state management ([e2671ef](https://github.com/NZ-WEB/nuxt-monitoring/commit/e2671ef))
+- Add TypeScript types for Health Check API ([7303059](https://github.com/NZ-WEB/nuxt-monitoring/commit/7303059))
+- Enhance playground UI with colored HTTP status indicators ([ce31946](https://github.com/NZ-WEB/nuxt-monitoring/commit/ce31946))
+- Add comprehensive test suite for all project functions ([35ef93d](https://github.com/NZ-WEB/nuxt-monitoring/commit/35ef93d))
+- Implement CORS support and direct debug server communication ([2316f48](https://github.com/NZ-WEB/nuxt-monitoring/commit/2316f48))
+
+### 🩹 Fixes
+
+- Set default endpoint configuration to disabled ([a088156](https://github.com/NZ-WEB/nuxt-monitoring/commit/a088156))
+
+### 📖 Documentation
+
+- Update readme ([05e173f](https://github.com/NZ-WEB/nuxt-monitoring/commit/05e173f))
+- Comprehensive documentation update with English localization ([9dde528](https://github.com/NZ-WEB/nuxt-monitoring/commit/9dde528))
+- Fix configuration defaults - endpoints disabled by default ([5a00ddc](https://github.com/NZ-WEB/nuxt-monitoring/commit/5a00ddc))
+
+### 🏡 Chore
+
+- Rm test ci job ([06edb38](https://github.com/NZ-WEB/nuxt-monitoring/commit/06edb38))
+- **commitizen:** Add commitizen ([b3909d2](https://github.com/NZ-WEB/nuxt-monitoring/commit/b3909d2))
+- Add commitlint ([a90e09c](https://github.com/NZ-WEB/nuxt-monitoring/commit/a90e09c))
+- **commitlint:** Add commitlit ([0278f2e](https://github.com/NZ-WEB/nuxt-monitoring/commit/0278f2e))
+- Add release scripts ([62b0cdc](https://github.com/NZ-WEB/nuxt-monitoring/commit/62b0cdc))
+- **release:** V1.0.0 ([4f699f2](https://github.com/NZ-WEB/nuxt-monitoring/commit/4f699f2))
+
+### ✅ Tests
+
+- Fix failing test cases in middleware specs ([3a2ba1d](https://github.com/NZ-WEB/nuxt-monitoring/commit/3a2ba1d))
+- Fix module default configuration expectations ([c0aa742](https://github.com/NZ-WEB/nuxt-monitoring/commit/c0aa742))
+
+### ❤️ Contributors
+
+- Zolotarevskiy Alexander <alex7annet@gmail.com>
+- Nzweb <nzkann1ball@gmail.com>
+
 ## v1.0.0
 
 [compare changes](https://github.com/NZ-WEB/nuxt-monitoring/compare/v0.9.2...v1.0.0)
