@@ -49,11 +49,35 @@ export default defineNuxtConfig({
 })
 ```
 
+**⚠️ Important**: By default, all endpoints are disabled. You need to explicitly enable the ones you want to use:
+
+```ts
+// Minimal setup - enable health checks only
+export default defineNuxtConfig({
+  modules: ['nuxt-monitoring'],
+  monitoring: {
+    healthCheck: { enabled: true }
+  }
+})
+
+// Full setup - enable all endpoints
+export default defineNuxtConfig({
+  modules: ['nuxt-monitoring'],
+  monitoring: {
+    metrics: { enabled: true },
+    healthCheck: { enabled: true },
+    readyCheck: { enabled: true }
+  }
+})
+```
+
 ## Configuration
+
+> **🔒 Security by Design**: All monitoring endpoints are **disabled by default**. This ensures your application doesn't expose monitoring data accidentally. You must explicitly enable each endpoint you want to use.
 
 ### Basic Configuration
 
-The module works with zero configuration but offers extensive customization:
+**Important**: All monitoring endpoints are **disabled by default**. You must explicitly enable the endpoints you need:
 
 ```ts
 // nuxt.config.ts
@@ -62,29 +86,42 @@ export default defineNuxtConfig({
   monitoring: {
     // Metrics endpoint configuration
     metrics: {
-      enabled: true,        // Enable/disable metrics collection
+      enabled: true,        // Must be explicitly enabled (default: false)
       path: '/metrics'      // Endpoint path for Prometheus metrics
     },
 
     // Health check endpoint configuration
     healthCheck: {
-      enabled: true,        // Enable/disable health checks
+      enabled: true,        // Must be explicitly enabled (default: false)
       path: '/health'       // Endpoint path for health checks
     },
 
     // Readiness probe configuration
     readyCheck: {
-      enabled: true,        // Enable/disable readiness checks
+      enabled: true,        // Must be explicitly enabled (default: false)
       path: '/ready'        // Endpoint path for readiness probes
     },
 
     // Debug server configuration (optional)
     debugServer: {
-      enabled: false,       // Enable separate debug server
+      enabled: false,       // Default: false
       port: 3001           // Port for debug server
     }
   }
 })
+```
+
+### Default Values
+
+All configuration options have the following defaults:
+
+```ts
+{
+  metrics: { enabled: false, path: '/metrics' },
+  healthCheck: { enabled: false, path: '/health' },
+  readyCheck: { enabled: false, path: '/ready' },
+  debugServer: { enabled: false, port: 3001 }
+}
 ```
 
 ### Debug Server Mode
@@ -95,6 +132,12 @@ Enable the debug server to run monitoring endpoints on a separate port:
 export default defineNuxtConfig({
   modules: ['nuxt-monitoring'],
   monitoring: {
+    // Enable the endpoints you need
+    metrics: { enabled: true },
+    healthCheck: { enabled: true },
+    readyCheck: { enabled: true },
+
+    // Enable debug server
     debugServer: {
       enabled: true,
       port: 3001          // Monitoring endpoints available at http://localhost:3001
@@ -132,15 +175,26 @@ export default defineNuxtConfig({
 
 ### Selective Endpoint Enabling
 
-Disable specific endpoints as needed:
+Enable only the endpoints you need (all are disabled by default):
 
 ```ts
 export default defineNuxtConfig({
   modules: ['nuxt-monitoring'],
   monitoring: {
-    metrics: { enabled: false },      // Disable metrics
-    readyCheck: { enabled: false },   // Disable readiness checks
-    healthCheck: { enabled: true }    // Keep only health checks
+    // Enable only specific endpoints
+    healthCheck: { enabled: true },   // Enable health checks
+    readyCheck: { enabled: true },    // Enable readiness checks
+    metrics: { enabled: false }       // Keep metrics disabled (default)
+  }
+})
+
+// Or enable all endpoints
+export default defineNuxtConfig({
+  modules: ['nuxt-monitoring'],
+  monitoring: {
+    metrics: { enabled: true },
+    healthCheck: { enabled: true },
+    readyCheck: { enabled: true }
   }
 })
 ```
@@ -410,6 +464,12 @@ The debug server feature allows you to run monitoring endpoints on a separate po
 export default defineNuxtConfig({
   modules: ['nuxt-monitoring'],
   monitoring: {
+    // Enable endpoints you want to expose via debug server
+    metrics: { enabled: true },
+    healthCheck: { enabled: true },
+    readyCheck: { enabled: true },
+
+    // Enable debug server
     debugServer: {
       enabled: true,
       port: 3001
@@ -422,9 +482,11 @@ export default defineNuxtConfig({
 
 When the debug server is enabled, monitoring endpoints are available at:
 
-- `http://localhost:3001/health` - Health check endpoint
-- `http://localhost:3001/ready` - Readiness probe endpoint
-- `http://localhost:3001/metrics` - Prometheus metrics endpoint
+- `http://localhost:3001/health` - Health check endpoint *(requires `healthCheck.enabled: true`)*
+- `http://localhost:3001/ready` - Readiness probe endpoint *(requires `readyCheck.enabled: true`)*
+- `http://localhost:3001/metrics` - Prometheus metrics endpoint *(requires `metrics.enabled: true`)*
+
+**Note**: Endpoints are only accessible if explicitly enabled in configuration.
 
 ### Benefits
 
