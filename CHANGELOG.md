@@ -1,6 +1,19 @@
 # Changelog
 
 
+## v1.3.0
+
+[compare changes](https://github.com/NZ-WEB/nuxt-monitoring/compare/v1.2.0...v1.3.0)
+
+### 🚀 Enhancements
+
+- **metrics:** Add histogram for HTTP request duration ([6e6e194](https://github.com/NZ-WEB/nuxt-monitoring/commit/6e6e194))
+- **metrics:** Add histogram with route normalization and status class grouping ([965b5de](https://github.com/NZ-WEB/nuxt-monitoring/commit/965b5de))
+
+### ❤️ Contributors
+
+- Icedevil <icedevil777111@mail.com>
+
 ## v1.2.0
 
 [compare changes](https://github.com/NZ-WEB/nuxt-monitoring/compare/v0.9.2...v1.2.0)
